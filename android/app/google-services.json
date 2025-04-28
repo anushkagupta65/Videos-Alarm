@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1030438775387",
+    "project_id": "videoalarm-a0b26",
+    "storage_bucket": "videoalarm-a0b26.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1030438775387:android:5b8e25956bad9c1c066d7e",
+        "android_client_info": {
+          "package_name": "com.videosalarm.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAAUrpGz9ybK9JoIMybYrt8Kt_T_4kOpBs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
