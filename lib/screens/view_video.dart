@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:videos_alarm_app/dynamic_link_services.dart';
 import 'dart:async';
 import 'dart:ui';
 import 'package:videos_alarm_app/screens/Vid_controller.dart';
@@ -11,6 +10,7 @@ import 'package:videos_alarm_app/screens/subscriptions.dart';
 import 'package:videos_alarm_app/screens/video_thumb.dart';
 import 'package:video_player/video_player.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:videos_alarm_app/services/dynamic_link_services.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class VideoAd {

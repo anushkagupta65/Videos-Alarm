@@ -114,7 +114,9 @@ class VideoItem {
 
   factory VideoItem.fromJson(Map<String, dynamic> json) {
     Timestamp? createdAtTimestamp = json['createdAt'] as Timestamp?;
-    DateTime createdAtDateTime = createdAtTimestamp != null ? createdAtTimestamp.toDate() : DateTime.now();
+    DateTime createdAtDateTime = createdAtTimestamp != null
+        ? createdAtTimestamp.toDate()
+        : DateTime.now();
 
     return VideoItem(
       videoId: json['videoId'] as String? ?? '',
@@ -123,9 +125,8 @@ class VideoItem {
       thumbnailUrl: json['videoThumbnailUrl'] as String? ?? '',
       actualStartTime: json['actualStartTime'] as String? ?? 'Not Available',
       videoTags: List<String>.from(json['videoTags'] as List? ?? []),
-      concurrentViewers: json['concurrentViewers']as int? ?? 0,
+      concurrentViewers: json['concurrentViewers'] as int? ?? 0,
       createdAt: createdAtDateTime,
-      
     );
   }
 }
@@ -136,7 +137,8 @@ class LiveVideos extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final liveVideosController = Get.find<LiveVideosController>(); // Get the controller
+    final liveVideosController =
+        Get.find<LiveVideosController>(); // Get the controller
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -144,25 +146,34 @@ class LiveVideos extends StatelessWidget {
         // Observe the liveVideos list for changes.
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          
           children: [
-            if (liveVideosController.liveVideos.isNotEmpty) // Conditionally render based on live video count
+            if (liveVideosController.liveVideos
+                .isNotEmpty) // Conditionally render based on live video count
               const Padding(
                 padding: EdgeInsets.all(8.0),
                 child: Center(
                   child: Text(
                     "Live Streams",
-                    style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
             if (liveVideosController.liveVideos.isNotEmpty)
-              SizedBox(height: 260, child: LiveVideosList(isLive: true)), // Render only if there are live videos
+              SizedBox(
+                  height: 260,
+                  child: LiveVideosList(
+                      isLive: true)), // Render only if there are live videos
             const Padding(
               padding: EdgeInsets.all(8.0),
               child: Text(
                 "Past Live Streams",
-                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold),
               ),
             ),
             Expanded(child: LiveVideosList(isLive: false)),
@@ -176,7 +187,8 @@ class LiveVideos extends StatelessWidget {
 // LiveVideosList Widget
 class LiveVideosList extends StatelessWidget {
   final bool isLive;
-  final liveVideosController = Get.find<LiveVideosController>(); // Get existing controller
+  final liveVideosController =
+      Get.find<LiveVideosController>(); // Get existing controller
 
   LiveVideosList({Key? key, required this.isLive}) : super(key: key);
 
@@ -188,11 +200,13 @@ class LiveVideosList extends StatelessWidget {
           : liveVideosController.pastLiveVideos; // Use separate lists
 
       if (liveVideosController.isLoading.value) {
-        return const Center(child: CircularProgressIndicator(color: Colors.white));
+        return const Center(
+            child: CircularProgressIndicator(color: Colors.white));
       } else if (liveVideosController.errorMessage.value.isNotEmpty) {
         return Center(
           child: Padding(
-            padding: const EdgeInsets.only(right: 16, left: 16,bottom: 16,top: 0),
+            padding:
+                const EdgeInsets.only(right: 16, left: 16, bottom: 16, top: 0),
             child: Text(
               liveVideosController.errorMessage.value,
               style: const TextStyle(color: Colors.red),
@@ -206,6 +220,7 @@ class LiveVideosList extends StatelessWidget {
                 style: const TextStyle(color: Colors.white)));
       } else {
         return ListView.builder(
+          reverse: true,
           scrollDirection: isLive ? Axis.horizontal : Axis.vertical,
           padding: const EdgeInsets.all(8.0),
           itemCount: videosToShow.length,
@@ -248,7 +263,8 @@ class LiveVideosList extends StatelessWidget {
             children: [
               Container(
                 decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(10)),
                   image: DecorationImage(
                     image: NetworkImage(video.thumbnailUrl),
                     fit: BoxFit.cover,
@@ -264,7 +280,10 @@ class LiveVideosList extends StatelessWidget {
                 ),
                 child: const Text(
                   'LIVE',
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12),
                 ),
               ),
             ],
@@ -277,7 +296,8 @@ class LiveVideosList extends StatelessWidget {
             children: [
               Text(
                 video.title,
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.bold),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -314,7 +334,8 @@ class LiveVideosList extends StatelessWidget {
               video.thumbnailUrl,
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) {
-                return const Center(child: Icon(Icons.error, color: Colors.red));
+                return const Center(
+                    child: Icon(Icons.error, color: Colors.red));
               },
             ),
           ),
@@ -328,7 +349,8 @@ class LiveVideosList extends StatelessWidget {
               children: [
                 Text(
                   video.title,
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),

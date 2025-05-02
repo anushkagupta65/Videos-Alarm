@@ -1,4 +1,5 @@
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:get/get.dart';
@@ -8,76 +9,92 @@ import 'package:videos_alarm_app/login_screen/splash_screen.dart';
 import 'package:videos_alarm_app/screens/Vid_controller.dart';
 import 'package:videos_alarm_app/screens/live_videos.dart';
 import 'package:videos_alarm_app/screens/view_video.dart';
+import 'package:videos_alarm_app/services/notification_services.dart';
 import 'app_store/app_pref.dart';
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  await NotificationService.backgroundHandler(message);
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
+    print('Starting initialization');
     await Firebase.initializeApp();
+    print('Firebase initialized');
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    print('FCM background handler set');
+    await NotificationService().initialize();
+    print('NotificationService initialized');
     await AppPref.initSessionManager();
+    print('Session manager initialized');
     Get.put(SubscriptionController());
+    print('SubscriptionController initialized');
     Get.put(LiveVideosController());
+    print('LiveVideosController initialized');
     Get.put(VideoController());
+    print('VideoController initialized');
     await _initDynamicLinks();
+    print('Dynamic Links initialized');
+
+    // Subscribe to FCM topics
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    await messaging.subscribeToTopic('new_blogs');
+    await messaging.subscribeToTopic('new_videos');
+    await messaging.subscribeToTopic('new_live_videos');
+    print('Subscribed to FCM topics: new_blogs, new_videos, new_live_videos');
+
     runApp(const MyApp());
+    print('App running');
   } catch (e) {
-    debugPrint('Initialization error: $e');
+    print('Initialization error: $e');
   }
 }
 
 Future<void> _initDynamicLinks() async {
   try {
-    // Handle initial link (cold start)
     final PendingDynamicLinkData? initialLink =
         await FirebaseDynamicLinks.instance.getInitialLink();
     if (initialLink != null) {
       _handleDeepLink(initialLink.link);
     }
-
-    // Handle foreground links using onLink (deprecated but still supported)
     FirebaseDynamicLinks.instance.onLink.listen(
         (PendingDynamicLinkData dynamicLinkData) {
       _handleDeepLink(dynamicLinkData.link);
     }, onError: (Object error) {
-      debugPrint('Error handling dynamic link: $error');
+      print('Error handling dynamic link: $error');
     }, onDone: () {
-      debugPrint('Link stream closed');
+      print('Link stream closed');
     });
   } catch (e) {
-    debugPrint('Error initializing dynamic links: $e');
+    print('Error initializing dynamic links: $e');
   }
 }
 
 void _handleDeepLink(Uri? deepLink) {
   if (deepLink != null) {
-    debugPrint('Received deep link: $deepLink');
-
-    // Validate the deep link domain
+    print('Received deep link: $deepLink');
     if (deepLink.host != 'https://www.videosalarmsapp.com/') {
-      debugPrint('Invalid Dynamic Link domain: ${deepLink.host}');
+      print('Invalid Dynamic Link domain: ${deepLink.host}');
       return;
     }
-
-    // Extract query parameters
     final videoId = deepLink.queryParameters['videoId'];
-
     if (videoId != null) {
-      debugPrint('Navigating to video with videoId: $videoId');
-      // Navigate after the UI is ready
+      print('Navigating to video with videoId: $videoId');
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Get.toNamed('/view_video', arguments: {
           'videoId': videoId,
         });
       });
     } else {
-      debugPrint('Missing videoId or invitedBy in deep link');
+      print('Missing videoId in deep link');
     }
   }
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
@@ -92,7 +109,7 @@ class MyApp extends StatelessWidget {
       getPages: [
         GetPage(
           name: '/view_video',
-          page: () => const ViewVideo(), // Ensure ViewVideo accepts arguments
+          page: () => const ViewVideo(),
         ),
       ],
     );
