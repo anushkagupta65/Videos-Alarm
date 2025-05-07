@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
@@ -105,7 +107,6 @@ class _RegisterState extends State<Register> {
     }
   }
 
-  // --- OTP Verification and Registration Logic ---
   Future<void> verifyOtpAndRegister() async {
     final String otp = _otpFromBoxes; // Get OTP from the digit boxes
     final String phone = phoneController.text.trim();
@@ -124,7 +125,7 @@ class _RegisterState extends State<Register> {
       isLoading = true;
     });
 
-    // Demo Phone Number
+    // Demo Phone Number & OTP
     if (phone == '1002003000' && otp == '000000') {
       setState(() {
         isLoading = false;
@@ -134,7 +135,6 @@ class _RegisterState extends State<Register> {
       return; // Exit early
     }
 
-    // REAL Number Verification
     const String apiUrl = 'http://165.22.215.103:3066/verifyOtp';
     Map<String, String> headers = {'Content-Type': 'application/json'};
     Map<String, dynamic> body = {'phone': phone, 'otp': otp};
@@ -147,12 +147,45 @@ class _RegisterState extends State<Register> {
       );
 
       if (response.statusCode == 200) {
-        // You would likely receive a success message or some data here
-        setState(() {
-          isLoading = false;
-        });
-        commToast('Registration Successful!'); // Adjust message if needed
-        Get.offAll(() => BottomBarTabs(initialIndex: 0));
+        final Map<String, dynamic> responseData = json.decode(response.body);
+        String customToken = responseData['token'];
+
+        // Sign in with Firebase using the custom token
+        UserCredential userCredential =
+            await FirebaseAuth.instance.signInWithCustomToken(customToken);
+        User? user = userCredential.user;
+
+        if (user != null) {
+          // Using a transaction for robust Firestore updates
+          FirebaseFirestore.instance.runTransaction((transaction) async {
+            DocumentReference userDocRef =
+                FirebaseFirestore.instance.collection('users').doc(user.uid);
+
+            // For registration, always set the user data (new user)
+            transaction.set(userDocRef, {
+              'name': name,
+              'phone': phone,
+              'createdAt': FieldValue.serverTimestamp(),
+              'lastLogin': FieldValue.serverTimestamp(),
+            });
+          }).then((_) {
+            setState(() {
+              isLoading = false;
+            });
+            commToast('Registration Successful!');
+            Get.offAll(() => BottomBarTabs(initialIndex: 0));
+          }).catchError((error) {
+            commToast("Error saving user data: $error");
+            setState(() {
+              isLoading = false;
+            });
+          });
+        } else {
+          commToast("Failed to register. Please try again.");
+          setState(() {
+            isLoading = false;
+          });
+        }
       } else {
         final errorBody = json.decode(response.body);
         final errorMessage = errorBody['message'] ?? 'OTP verification failed';
@@ -168,6 +201,70 @@ class _RegisterState extends State<Register> {
       });
     }
   }
+
+  // --- OTP Verification and Registration Logic ---
+  // Future<void> verifyOtpAndRegister() async {
+  //   final String otp = _otpFromBoxes; // Get OTP from the digit boxes
+  //   final String phone = phoneController.text.trim();
+  //   final String name = nameController.text.trim(); // Get name
+
+  //   if (otp.length != 6) {
+  //     commToast('Please enter the 6-digit OTP');
+  //     return;
+  //   }
+  //   if (name.isEmpty) {
+  //     commToast('Please enter your name');
+  //     return;
+  //   }
+
+  //   setState(() {
+  //     isLoading = true;
+  //   });
+
+  //   // Demo Phone Number
+  //   if (phone == '1002003000' && otp == '000000') {
+  //     setState(() {
+  //       isLoading = false;
+  //     });
+  //     commToast('Registration Successful! (Simulated)');
+  //     Get.offAll(() => BottomBarTabs(initialIndex: 0));
+  //     return; // Exit early
+  //   }
+
+  //   // REAL Number Verification
+  //   const String apiUrl = 'http://165.22.215.103:3066/verifyOtp';
+  //   Map<String, String> headers = {'Content-Type': 'application/json'};
+  //   Map<String, dynamic> body = {'phone': phone, 'otp': otp};
+
+  //   try {
+  //     final response = await http.post(
+  //       Uri.parse(apiUrl),
+  //       headers: headers,
+  //       body: jsonEncode(body),
+  //     );
+
+  //     if (response.statusCode == 200) {
+  //       // You would likely receive a success message or some data here
+  //       setState(() {
+  //         isLoading = false;
+  //       });
+  //       commToast('Registration Successful!'); // Adjust message if needed
+  //       Get.offAll(() => BottomBarTabs(initialIndex: 0));
+  //     } else {
+  //       final errorBody = json.decode(response.body);
+  //       final errorMessage = errorBody['message'] ?? 'OTP verification failed';
+  //       commToast(errorMessage);
+  //       setState(() {
+  //         isLoading = false;
+  //       });
+  //     }
+  //   } catch (e) {
+  //     commToast('Registration failed. Please try again.');
+  //     setState(() {
+  //       isLoading = false;
+  //     });
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
