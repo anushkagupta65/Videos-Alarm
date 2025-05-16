@@ -1163,6 +1163,9 @@ PODS:
     - FirebaseAuth (~> 11.2.0)
   - Firebase/CoreOnly (11.2.0):
     - FirebaseCore (= 11.2.0)
+  - Firebase/DynamicLinks (11.2.0):
+    - Firebase/CoreOnly
+    - FirebaseDynamicLinks (~> 11.2.0)
   - Firebase/Firestore (11.2.0):
     - Firebase/CoreOnly
     - FirebaseFirestore (~> 11.2.0)
@@ -1178,6 +1181,10 @@ PODS:
     - Flutter
   - firebase_core (3.6.0):
     - Firebase/CoreOnly (= 11.2.0)
+    - Flutter
+  - firebase_dynamic_links (6.0.8):
+    - Firebase/DynamicLinks (= 11.2.0)
+    - firebase_core
     - Flutter
   - firebase_messaging (15.1.3):
     - Firebase/Messaging (= 11.2.0)
@@ -1206,6 +1213,8 @@ PODS:
     - FirebaseCore (~> 11.0)
   - FirebaseCoreInternal (11.11.0):
     - "GoogleUtilities/NSData+zlib (~> 8.0)"
+  - FirebaseDynamicLinks (11.2.0):
+    - FirebaseCore (~> 11.0)
   - FirebaseFirestore (11.2.0):
     - FirebaseCore (~> 11.0)
     - FirebaseCoreExtension (~> 11.0)
@@ -1256,6 +1265,8 @@ PODS:
   - flutter_inappwebview_ios/Core (0.0.1):
     - Flutter
     - OrderedSet (~> 6.0.3)
+  - flutter_local_notifications (0.0.1):
+    - Flutter
   - flutter_secure_storage (6.0.0):
     - Flutter
   - fluttertoast (0.0.2):
@@ -1378,7 +1389,11 @@ PODS:
     - gRPC-Core/Privacy (= 1.65.5)
   - gRPC-Core/Interface (1.65.5)
   - gRPC-Core/Privacy (1.65.5)
+  - GTMSessionFetcher (3.5.0):
+    - GTMSessionFetcher/Full (= 3.5.0)
   - GTMSessionFetcher/Core (3.5.0)
+  - GTMSessionFetcher/Full (3.5.0):
+    - GTMSessionFetcher/Core
   - in_app_purchase_storekit (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -1396,9 +1411,13 @@ PODS:
     - FlutterMacOS
   - PromisesObjC (2.4.0)
   - RecaptchaInterop (100.0.0)
+  - share_plus (0.0.1):
+    - Flutter
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
+  - sms_autofill (0.0.1):
+    - Flutter
   - sqflite_darwin (0.0.4):
     - Flutter
     - FlutterMacOS
@@ -1416,22 +1435,29 @@ DEPENDENCIES:
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/darwin`)
   - firebase_auth (from `.symlinks/plugins/firebase_auth/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
+  - firebase_dynamic_links (from `.symlinks/plugins/firebase_dynamic_links/ios`)
   - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
   - firebase_storage (from `.symlinks/plugins/firebase_storage/ios`)
   - Flutter (from `Flutter`)
   - flutter_inappwebview_ios (from `.symlinks/plugins/flutter_inappwebview_ios/ios`)
+  - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
+  - GTMSessionFetcher (~> 3.4)
   - in_app_purchase_storekit (from `.symlinks/plugins/in_app_purchase_storekit/darwin`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
+  - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
+  - sms_autofill (from `.symlinks/plugins/sms_autofill/ios`)
   - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
   - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/darwin`)
   - wakelock_plus (from `.symlinks/plugins/wakelock_plus/ios`)
 
 SPEC REPOS:
+  https://github.com/CocoaPods/Specs.git:
+    - GTMSessionFetcher
   trunk:
     - abseil
     - BoringSSL-GRPC
@@ -1442,6 +1468,7 @@ SPEC REPOS:
     - FirebaseCore
     - FirebaseCoreExtension
     - FirebaseCoreInternal
+    - FirebaseDynamicLinks
     - FirebaseFirestore
     - FirebaseFirestoreInternal
     - FirebaseInstallations
@@ -1452,7 +1479,6 @@ SPEC REPOS:
     - GoogleUtilities
     - "gRPC-C++"
     - gRPC-Core
-    - GTMSessionFetcher
     - leveldb-library
     - nanopb
     - OrderedSet
@@ -1469,6 +1495,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/firebase_auth/ios"
   firebase_core:
     :path: ".symlinks/plugins/firebase_core/ios"
+  firebase_dynamic_links:
+    :path: ".symlinks/plugins/firebase_dynamic_links/ios"
   firebase_messaging:
     :path: ".symlinks/plugins/firebase_messaging/ios"
   firebase_storage:
@@ -1477,6 +1505,8 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_inappwebview_ios:
     :path: ".symlinks/plugins/flutter_inappwebview_ios/ios"
+  flutter_local_notifications:
+    :path: ".symlinks/plugins/flutter_local_notifications/ios"
   flutter_secure_storage:
     :path: ".symlinks/plugins/flutter_secure_storage/ios"
   fluttertoast:
@@ -1487,8 +1517,12 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/package_info_plus/ios"
   path_provider_foundation:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
+  share_plus:
+    :path: ".symlinks/plugins/share_plus/ios"
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
+  sms_autofill:
+    :path: ".symlinks/plugins/sms_autofill/ios"
   sqflite_darwin:
     :path: ".symlinks/plugins/sqflite_darwin/darwin"
   url_launcher_ios:
@@ -1506,6 +1540,7 @@ SPEC CHECKSUMS:
   Firebase: 98e6bf5278170668a7983e12971a66b2cd57fc8c
   firebase_auth: 0c77e299a8f2d1c74d1b1f6b78b3d4d802c19f47
   firebase_core: 2bedc3136ec7c7b8561c6123ed0239387b53f2af
+  firebase_dynamic_links: 31addc071dc0e3ebd7a8f969b5e592636200b7c1
   firebase_messaging: 15d114e1a41fc31e4fbabcd48d765a19eec94a38
   firebase_storage: cee0d3d2e947db11289bbb57ed73a447ea111ec1
   FirebaseAppCheckInterop: f23709c9ce92d810aa53ff4ce12ad3e666a3c7be
@@ -1514,6 +1549,7 @@ SPEC CHECKSUMS:
   FirebaseCore: a282032ae9295c795714ded2ec9c522fc237f8da
   FirebaseCoreExtension: f1bc67a4702931a7caa097d8e4ac0a1b0d16720e
   FirebaseCoreInternal: 31ee350d87b30a9349e907f84bf49ef8e6791e5a
+  FirebaseDynamicLinks: 4fa5589f3d0c59b00235025a36690edf97559409
   FirebaseFirestore: 62708adbc1dfcd6d165a7c0a202067b441912dc9
   FirebaseFirestoreInternal: ad9b9ee2d3d430c8f31333a69b3b6737a7206232
   FirebaseInstallations: 6ef4a1c7eb2a61ee1f74727d7f6ce2e72acf1414
@@ -1522,6 +1558,7 @@ SPEC CHECKSUMS:
   FirebaseStorage: 9353f926690b2329957860abfcbc8b4074fe45e8
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_inappwebview_ios: 6f63631e2c62a7c350263b13fa5427aedefe81d4
+  flutter_local_notifications: df98d66e515e1ca797af436137b4459b160ad8c9
   flutter_secure_storage: d33dac7ae2ea08509be337e775f6b59f1ff45f12
   fluttertoast: e9a18c7be5413da53898f660530c56f35edfba9c
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
@@ -1537,13 +1574,15 @@ SPEC CHECKSUMS:
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   RecaptchaInterop: 7d1a4a01a6b2cb1610a47ef3f85f0c411434cb21
+  share_plus: 8b6f8b3447e494cca5317c8c3073de39b3600d1f
   shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
+  sms_autofill: c461043483362c3f1709ee76eaae6eb570b31686
   sqflite_darwin: 5a7236e3b501866c1c9befc6771dfd73ffb8702d
   Toast: 1f5ea13423a1e6674c4abdac5be53587ae481c4e
   url_launcher_ios: 5334b05cef931de560670eeae103fd3e431ac3fe
   video_player_avfoundation: 7c6c11d8470e1675df7397027218274b6d2360b3
   wakelock_plus: 78ec7c5b202cab7761af8e2b2b3d0671be6c4ae1
 
-PODFILE CHECKSUM: 65b4d2c8a9d1c3cde6c27fada9391da6432e0ddf
+PODFILE CHECKSUM: 2a3a39882884b9f52b3f3aaeb170c73fb7ac569c
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2

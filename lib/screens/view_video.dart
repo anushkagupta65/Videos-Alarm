@@ -48,7 +48,6 @@ class ViewVideoController extends GetxController with WidgetsBindingObserver {
   Rx<YoutubePlayerController?> adYoutubePlayerController =
       Rx<YoutubePlayerController?>(null);
   final VideoController videoController = Get.find<VideoController>();
-  RxBool isVisible = false.obs;
   RxBool viewCountUpdated = false.obs;
 
   RxBool isAdPlaying = false.obs;
@@ -78,10 +77,6 @@ class ViewVideoController extends GetxController with WidgetsBindingObserver {
 
     _fetchVideoAds();
     _incrementViewCount();
-
-    Future.delayed(const Duration(milliseconds: 100), () {
-      isVisible.value = true;
-    });
   }
 
   @override
@@ -342,6 +337,90 @@ class ViewVideoController extends GetxController with WidgetsBindingObserver {
   }
 }
 
+class SubscriptionAlert extends StatefulWidget {
+  final VoidCallback onActivate;
+
+  const SubscriptionAlert({Key? key, required this.onActivate})
+      : super(key: key);
+
+  @override
+  _SubscriptionAlertState createState() => _SubscriptionAlertState();
+}
+
+class _SubscriptionAlertState extends State<SubscriptionAlert> {
+  bool _isVisible = false;
+  final GlobalKey _textKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_textKey.currentContext != null) {
+        setState(() {
+          _isVisible = true;
+        });
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+        child: Center(
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.8,
+            constraints: const BoxConstraints(maxWidth: 400),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: Colors.black87,
+            ),
+            padding: const EdgeInsets.all(20),
+            child: AnimatedScale(
+              scale: _isVisible ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 500),
+              curve: Curves.easeOut,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(BoxIcons.bx_lock, size: 50, color: Colors.white),
+                  const SizedBox(height: 20),
+                  Text(
+                    "A subscription is required\nto access this content.",
+                    key: _textKey,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: widget.onActivate,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 30, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text("Activate Account",
+                        style: TextStyle(fontSize: 16)),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class ViewVideo extends StatelessWidget {
   final String? videoLink;
   final String? videoTitle;
@@ -395,6 +474,8 @@ class ViewVideo extends StatelessWidget {
           return const Center(
               child: CircularProgressIndicator(color: Colors.white));
         }
+
+        final isSubscribed = controller.videoController.isUserActive.value;
 
         return RefreshIndicator(
           onRefresh: () => controller.refreshContent(),
@@ -621,60 +702,10 @@ class ViewVideo extends StatelessWidget {
                       ],
                     ),
                   ),
-                  if (!controller.videoController.isUserActive.value)
-                    Positioned.fill(
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                        child: Center(
-                          child: Container(
-                            width: MediaQuery.of(context).size.width * 0.8,
-                            constraints: const BoxConstraints(maxWidth: 400),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              color: Colors.black87,
-                            ),
-                            padding: const EdgeInsets.all(20),
-                            child: AnimatedScale(
-                              scale: controller.isVisible.value ? 1.0 : 0.0,
-                              duration: const Duration(milliseconds: 500),
-                              curve: Curves.easeOut,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(BoxIcons.bx_lock,
-                                      size: 50, color: Colors.white),
-                                  const SizedBox(height: 20),
-                                  const Text(
-                                    "A subscription is required\nto access this content.",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  const SizedBox(height: 20),
-                                  ElevatedButton(
-                                    onPressed: () => Get.to(
-                                        () => const SubscriptionsScreen()),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.blueAccent,
-                                      foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 30, vertical: 12),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                    ),
-                                    child: const Text("Activate Account",
-                                        style: TextStyle(fontSize: 16)),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
+                  if (!isSubscribed)
+                    SubscriptionAlert(
+                      onActivate: () =>
+                          Get.to(() => const SubscriptionsScreen()),
                     ),
                 ],
               );

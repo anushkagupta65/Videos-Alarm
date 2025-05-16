@@ -43,8 +43,10 @@ class ViewVideoController extends GetxController with WidgetsBindingObserver {
   });
 
   Rx<ChewieController?> chewieController = Rx<ChewieController?>(null);
-  Rx<VideoPlayerController?> videoPlayerController = Rx<VideoPlayerController?>(null);
-  Rx<YoutubePlayerController?> adYoutubePlayerController = Rx<YoutubePlayerController?>(null);
+  Rx<VideoPlayerController?> videoPlayerController =
+      Rx<VideoPlayerController?>(null);
+  Rx<YoutubePlayerController?> adYoutubePlayerController =
+      Rx<YoutubePlayerController?>(null);
   final VideoController videoController = Get.find<VideoController>();
   RxBool isVisible = false.obs;
   RxBool viewCountUpdated = false.obs;
@@ -107,7 +109,8 @@ class ViewVideoController extends GetxController with WidgetsBindingObserver {
     // Ensure the main video URL is valid before re-initializing
     if (videoLink != null && videoLink!.isNotEmpty) {
       await _initializeVideoPlayer(videoLink!); // Re-initialize main video
-      sortedAds.forEach((ad) => ad.played = false); // Reset played status of ads
+      sortedAds
+          .forEach((ad) => ad.played = false); // Reset played status of ads
       nextAdIndex = 0; // Reset ad index
       _startAdScheduler(); // Restart ad scheduler
     }
@@ -127,8 +130,10 @@ class ViewVideoController extends GetxController with WidgetsBindingObserver {
         final videoId = YoutubePlayer.convertUrlToId(adUrl) ?? adUrl;
 
         return VideoAd(
-          timestamp: Duration(seconds: (data['startTimestamp'] as num? ?? 0).toInt()),
-          duration: Duration(seconds: (data['endTimestamp'] as num? ?? 15).toInt()) -
+          timestamp:
+              Duration(seconds: (data['startTimestamp'] as num? ?? 0).toInt()),
+          duration: Duration(
+                  seconds: (data['endTimestamp'] as num? ?? 15).toInt()) -
               Duration(seconds: (data['startTimestamp'] as num? ?? 0).toInt()),
           adUrl: videoId,
         );
@@ -147,7 +152,8 @@ class ViewVideoController extends GetxController with WidgetsBindingObserver {
   Future<void> _initializeVideoPlayer(String videoUrl) async {
     try {
       await videoPlayerController.value?.dispose();
-      videoPlayerController.value = VideoPlayerController.networkUrl(Uri.parse(videoUrl));
+      videoPlayerController.value =
+          VideoPlayerController.networkUrl(Uri.parse(videoUrl));
       await videoPlayerController.value!.initialize();
 
       chewieController.value = ChewieController(
@@ -158,7 +164,8 @@ class ViewVideoController extends GetxController with WidgetsBindingObserver {
         allowedScreenSleep: false,
         aspectRatio: videoPlayerController.value!.value.aspectRatio,
         errorBuilder: (context, errorMessage) => Center(
-          child: Text(errorMessage, style: const TextStyle(color: Colors.white)),
+          child:
+              Text(errorMessage, style: const TextStyle(color: Colors.white)),
         ),
       )..addListener(_videoListener);
 
@@ -176,7 +183,8 @@ class ViewVideoController extends GetxController with WidgetsBindingObserver {
     if (!videoController.isUserActive.value || isAdPlaying.value) return;
 
     final currentPosition = videoPlayerController.value!.value.position;
-    final positionJump = (currentPosition - lastKnownPosition).abs() > const Duration(milliseconds: 500);
+    final positionJump = (currentPosition - lastKnownPosition).abs() >
+        const Duration(milliseconds: 500);
 
     if (positionJump && lastKnownPosition != Duration.zero) {
       _handleSeek(currentPosition);
@@ -189,12 +197,15 @@ class ViewVideoController extends GetxController with WidgetsBindingObserver {
 
     if (!videoController.isUserActive.value) return;
 
-    nextAdIndex = sortedAds.indexWhere((ad) => !ad.played && ad.timestamp > currentPosition);
+    nextAdIndex = sortedAds
+        .indexWhere((ad) => !ad.played && ad.timestamp > currentPosition);
     if (nextAdIndex == -1) nextAdIndex = sortedAds.length;
 
     for (final ad in sortedAds) {
       final diffFromAd = currentPosition - ad.timestamp;
-      if (!ad.played && diffFromAd > Duration.zero && diffFromAd < const Duration(seconds: 2)) {
+      if (!ad.played &&
+          diffFromAd > Duration.zero &&
+          diffFromAd < const Duration(seconds: 2)) {
         nextAdIndex = sortedAds.indexOf(ad) + 1;
         _playAd(ad);
         return;
@@ -206,10 +217,12 @@ class ViewVideoController extends GetxController with WidgetsBindingObserver {
 
   void _startAdScheduler() {
     adSchedulerTimer?.cancel();
-    if (!videoController.isUserActive.value || nextAdIndex >= sortedAds.length) return;
+    if (!videoController.isUserActive.value || nextAdIndex >= sortedAds.length)
+      return;
 
     final nextAd = sortedAds[nextAdIndex];
-    final currentPosition = videoPlayerController.value?.value.position ?? Duration.zero;
+    final currentPosition =
+        videoPlayerController.value?.value.position ?? Duration.zero;
     final timeUntilAd = nextAd.timestamp - currentPosition;
 
     if (timeUntilAd <= Duration.zero) {
@@ -230,7 +243,8 @@ class ViewVideoController extends GetxController with WidgetsBindingObserver {
     if (!videoController.isUserActive.value || isAdPlaying.value) return;
 
     ad.played = true;
-    lastKnownPosition = videoPlayerController.value?.value.position ?? Duration.zero;
+    lastKnownPosition =
+        videoPlayerController.value?.value.position ?? Duration.zero;
     chewieController.value?.pause();
 
     adYoutubePlayerController.value = YoutubePlayerController(
@@ -254,13 +268,15 @@ class ViewVideoController extends GetxController with WidgetsBindingObserver {
         final adDuration = ad.duration;
 
         // **Here is the modification:** Listen for the video to end.
-        if (adYoutubePlayerController.value!.value.playerState == PlayerState.ended ||
+        if (adYoutubePlayerController.value!.value.playerState ==
+                PlayerState.ended ||
             adPosition >= adDuration) {
-
           if (!isResuming.value) {
-            isResuming.value = true; // Prevent multiple calls during resume process
+            isResuming.value =
+                true; // Prevent multiple calls during resume process
 
-            adYoutubePlayerController.value!.removeListener(adListener); // Remove listener before resuming
+            adYoutubePlayerController.value!
+                .removeListener(adListener); // Remove listener before resuming
 
             _resumeMainVideo();
           }
@@ -283,7 +299,8 @@ class ViewVideoController extends GetxController with WidgetsBindingObserver {
     adYoutubePlayerController.value!.pause();
 
     // **Delay before disposing:** Added a small delay
-    await Future.delayed(const Duration(milliseconds: 200)); //Small delay to ensure pause is executed.
+    await Future.delayed(const Duration(
+        milliseconds: 200)); //Small delay to ensure pause is executed.
 
     final tempController = adYoutubePlayerController.value;
     adYoutubePlayerController.value = null; // Clear reference before disposal
@@ -295,7 +312,8 @@ class ViewVideoController extends GetxController with WidgetsBindingObserver {
     // Resume Chewie video from the last known position
     chewieController.value?.seekTo(lastKnownPosition);
 
-    await Future.delayed(const Duration(milliseconds: 100)); //Small delay to ensure seek is executed.
+    await Future.delayed(const Duration(
+        milliseconds: 100)); //Small delay to ensure seek is executed.
 
     chewieController.value?.play();
     nextAdIndex++;
@@ -309,7 +327,8 @@ class ViewVideoController extends GetxController with WidgetsBindingObserver {
     if (viewCountUpdated.value) return;
 
     try {
-      final videoDocRef = FirebaseFirestore.instance.collection('videos').doc(videoId);
+      final videoDocRef =
+          FirebaseFirestore.instance.collection('videos').doc(videoId);
       await videoDocRef.update({'views': FieldValue.increment(1)});
       viewCountUpdated.value = true;
     } catch (e) {
@@ -331,11 +350,12 @@ class ViewVideoController extends GetxController with WidgetsBindingObserver {
   @override
   void onClose() {
     WidgetsBinding.instance.removeObserver(this);
-    chewieController.value?.pause();  //Ensure video is paused before disposing
+    chewieController.value?.pause(); //Ensure video is paused before disposing
     chewieController.value?.removeListener(_videoListener);
     chewieController.value?.dispose();
     videoPlayerController.value?.dispose();
-    adYoutubePlayerController.value?.dispose(); // Safe disposal in case listener didn’t trigger
+    adYoutubePlayerController.value
+        ?.dispose(); // Safe disposal in case listener didn’t trigger
     adSchedulerTimer?.cancel();
     super.onClose();
   }
@@ -376,11 +396,11 @@ class ViewVideo extends StatelessWidget {
         elevation: 0,
         backgroundColor: Colors.black,
         title: Obx(() => Text(
-          controller.videoController.currentVideoTitle.value,
-          style: const TextStyle(color: Colors.white, fontSize: 18),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        )),
+              controller.videoController.currentVideoTitle.value,
+              style: const TextStyle(color: Colors.white, fontSize: 18),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            )),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
@@ -392,7 +412,8 @@ class ViewVideo extends StatelessWidget {
       ),
       body: Obx(() {
         if (controller.videoController.isLoading.value) {
-          return const Center(child: CircularProgressIndicator(color: Colors.white));
+          return const Center(
+              child: CircularProgressIndicator(color: Colors.white));
         }
 
         return RefreshIndicator(
@@ -410,15 +431,22 @@ class ViewVideo extends StatelessWidget {
                         SizedBox(
                           height: 240,
                           width: double.infinity,
-                          child: controller.isAdPlaying.value && controller.adYoutubePlayerController.value != null
+                          child: controller.isAdPlaying.value &&
+                                  controller.adYoutubePlayerController.value !=
+                                      null
                               ? YoutubePlayer(
-                            controller: controller.adYoutubePlayerController.value!,
-                            showVideoProgressIndicator: true,
-                            progressIndicatorColor: Colors.red,
-                          )
+                                  controller: controller
+                                      .adYoutubePlayerController.value!,
+                                  showVideoProgressIndicator: true,
+                                  progressIndicatorColor: Colors.red,
+                                )
                               : (controller.chewieController.value != null
-                              ? Chewie(controller: controller.chewieController.value!)
-                              : const Center(child: CircularProgressIndicator(color: Colors.white))),
+                                  ? Chewie(
+                                      controller:
+                                          controller.chewieController.value!)
+                                  : const Center(
+                                      child: CircularProgressIndicator(
+                                          color: Colors.white))),
                         ),
                         if (controller.isAdPlaying.value) ...[
                           Padding(
@@ -427,32 +455,46 @@ class ViewVideo extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 6),
                                   decoration: BoxDecoration(
                                     color: Colors.black87,
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: const Text(
                                     'Advertisement',
-                                    style: TextStyle(color: Colors.white, fontSize: 14),
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 14),
                                   ),
                                 ),
                                 StreamBuilder<Duration>(
-                                  stream: Stream.periodic(const Duration(seconds: 1))
-                                      .map((_) => controller.adYoutubePlayerController.value?.value.position ?? Duration.zero)
-                                      .takeWhile((pos) => pos < (controller.currentAd.value?.duration ?? Duration.zero)),
+                                  stream: Stream.periodic(
+                                          const Duration(seconds: 1))
+                                      .map((_) =>
+                                          controller.adYoutubePlayerController
+                                              .value?.value.position ??
+                                          Duration.zero)
+                                      .takeWhile((pos) =>
+                                          pos <
+                                          (controller
+                                                  .currentAd.value?.duration ??
+                                              Duration.zero)),
                                   builder: (context, snapshot) {
-                                    final remaining = (controller.currentAd.value?.duration ?? Duration.zero) -
-                                        (snapshot.data ?? Duration.zero);
+                                    final remaining =
+                                        (controller.currentAd.value?.duration ??
+                                                Duration.zero) -
+                                            (snapshot.data ?? Duration.zero);
                                     return Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 6),
                                       decoration: BoxDecoration(
                                         color: Colors.black87,
                                         borderRadius: BorderRadius.circular(4),
                                       ),
                                       child: Text(
                                         'Ad: ${remaining.inSeconds}s',
-                                        style: const TextStyle(color: Colors.white, fontSize: 14),
+                                        style: const TextStyle(
+                                            color: Colors.white, fontSize: 14),
                                       ),
                                     );
                                   },
@@ -492,10 +534,12 @@ class ViewVideo extends StatelessWidget {
                                 .snapshots(),
                             builder: (context, snapshot) {
                               if (!snapshot.hasData) {
-                                return const Text('Views: Loading...', style: TextStyle(color: Colors.white));
+                                return const Text('Views: Loading...',
+                                    style: TextStyle(color: Colors.white));
                               }
                               final views = snapshot.data!['views'] ?? 0;
-                              return Text('Views: $views', style: const TextStyle(color: Colors.white));
+                              return Text('Views: $views',
+                                  style: const TextStyle(color: Colors.white));
                             },
                           ),
                         ),
@@ -515,30 +559,34 @@ class ViewVideo extends StatelessWidget {
                         SizedBox(
                           height: 200,
                           child: Obx(() => ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: controller.videoController.sameCategoryVideos.length,
-                            itemBuilder: (context, index) {
-                              final video = controller.videoController.sameCategoryVideos[index];
-                              return GestureDetector(
-                                onTap: () {
-                                  controller.chewieController.value?.pause();
-                                  Get.off(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: controller
+                                    .videoController.sameCategoryVideos.length,
+                                itemBuilder: (context, index) {
+                                  final video = controller.videoController
+                                      .sameCategoryVideos[index];
+                                  return GestureDetector(
+                                    onTap: () {
+                                      controller.chewieController.value
+                                          ?.pause();
+                                      Get.off(
                                         () => ViewVideo(
-                                      videoLink: video['videoUrl'],
-                                      videoTitle: video['title'],
-                                      description: video['description'],
-                                      category: category,
-                                      videoId: video['videoId'],
+                                          videoLink: video['videoUrl'],
+                                          videoTitle: video['title'],
+                                          description: video['description'],
+                                          category: category,
+                                          videoId: video['videoId'],
+                                        ),
+                                      );
+                                    },
+                                    child: Padding(
+                                      padding:
+                                          const EdgeInsets.only(right: 10.0),
+                                      child: VideoThumbnail(video: video),
                                     ),
                                   );
                                 },
-                                child: Padding(
-                                  padding: const EdgeInsets.only(right: 10.0),
-                                  child: VideoThumbnail(video: video),
-                                ),
-                              );
-                            },
-                          )),
+                              )),
                         ),
                       ],
                     ),
@@ -558,12 +606,13 @@ class ViewVideo extends StatelessWidget {
                             padding: const EdgeInsets.all(20),
                             child: AnimatedScale(
                               scale: controller.isVisible.value ? 1.0 : 0.0,
-                              duration: const Duration(milliseconds: 500),
+                              duration: const Duration(milliseconds: 100),
                               curve: Curves.easeOut,
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(BoxIcons.bx_lock, size: 50, color: Colors.white),
+                                  const Icon(BoxIcons.bx_lock,
+                                      size: 50, color: Colors.white),
                                   const SizedBox(height: 20),
                                   const Text(
                                     "A subscription is required\nto access this content.",
@@ -576,16 +625,19 @@ class ViewVideo extends StatelessWidget {
                                   ),
                                   const SizedBox(height: 20),
                                   ElevatedButton(
-                                    onPressed: () => Get.to(() => const SubscriptionsScreen()),
+                                    onPressed: () => Get.to(
+                                        () => const SubscriptionsScreen()),
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.blueAccent,
                                       foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 30, vertical: 12),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                     ),
-                                    child: const Text("Activate Account", style: TextStyle(fontSize: 16)),
+                                    child: const Text("Activate Account",
+                                        style: TextStyle(fontSize: 16)),
                                   ),
                                 ],
                               ),

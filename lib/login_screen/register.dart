@@ -26,6 +26,7 @@ class _RegisterState extends State<Register> {
   bool isLoading = false;
   bool agreeTcs = false;
   bool isOtpSent = false;
+  bool isVerifyingOtp = false; // New flag for Verify OTP button loader
 
   // Controllers for Name, Phone
   final TextEditingController nameController = TextEditingController();
@@ -122,13 +123,13 @@ class _RegisterState extends State<Register> {
     }
 
     setState(() {
-      isLoading = true;
+      isVerifyingOtp = true; // Set loader for Verify OTP
     });
 
     // Demo Phone Number & OTP
     if (phone == '1002003000' && otp == '000000') {
       setState(() {
-        isLoading = false;
+        isVerifyingOtp = false;
       });
       commToast('Registration Successful! (Simulated)');
       Get.offAll(() => BottomBarTabs(initialIndex: 0));
@@ -170,20 +171,20 @@ class _RegisterState extends State<Register> {
             });
           }).then((_) {
             setState(() {
-              isLoading = false;
+              isVerifyingOtp = false;
             });
             commToast('Registration Successful!');
             Get.offAll(() => BottomBarTabs(initialIndex: 0));
           }).catchError((error) {
             commToast("Error saving user data: $error");
             setState(() {
-              isLoading = false;
+              isVerifyingOtp = false;
             });
           });
         } else {
           commToast("Failed to register. Please try again.");
           setState(() {
-            isLoading = false;
+            isVerifyingOtp = false;
           });
         }
       } else {
@@ -191,13 +192,13 @@ class _RegisterState extends State<Register> {
         final errorMessage = errorBody['message'] ?? 'OTP verification failed';
         commToast(errorMessage);
         setState(() {
-          isLoading = false;
+          isVerifyingOtp = false;
         });
       }
     } catch (e) {
       commToast('Registration failed. Please try again.');
       setState(() {
-        isLoading = false;
+        isVerifyingOtp = false;
       });
     }
   }
@@ -260,9 +261,9 @@ class _RegisterState extends State<Register> {
   //     }
   //   } catch (e) {
   //     commToast('Registration failed. Please try again.');
-  //     setState(() {
+  //     setState() {
   //       isLoading = false;
-  //     });
+  //     }
   //   }
   // }
 
@@ -427,7 +428,7 @@ class _RegisterState extends State<Register> {
 
                   // Action Button (Send OTP / Verify OTP & Register)
                   ElevatedButton(
-                    onPressed: isLoading
+                    onPressed: isLoading || isVerifyingOtp
                         ? null
                         : () {
                             if (!_formKey.currentState!.validate() ||
@@ -461,7 +462,7 @@ class _RegisterState extends State<Register> {
                       elevation: 5, // Added elevation for depth
                       shadowColor: greenColor.withOpacity(0.5), // Subtle shadow
                     ),
-                    child: isLoading
+                    child: isOtpSent && isVerifyingOtp
                         ? SizedBox(
                             width: 20, // Consistent size for indicator
                             height: 20,
@@ -471,9 +472,19 @@ class _RegisterState extends State<Register> {
                               strokeWidth: 2, // Thinner progress indicator
                             ),
                           )
-                        : Text(isOtpSent
-                            ? "Verify OTP & Register"
-                            : "Send OTP"), // Dynamic text
+                        : isLoading
+                            ? SizedBox(
+                                width: 20, // Consistent size for indicator
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  valueColor:
+                                      AlwaysStoppedAnimation<Color>(blackColor),
+                                  strokeWidth: 2, // Thinner progress indicator
+                                ),
+                              )
+                            : Text(isOtpSent
+                                ? "Verify OTP & Register"
+                                : "Send OTP"), // Dynamic text
                   ),
                   SizedBox(height: 40), // Consistent spacing
 

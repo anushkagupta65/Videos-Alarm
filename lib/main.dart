@@ -1,7 +1,8 @@
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:videos_alarm_app/Controller/Sub_controller.dart';
@@ -9,13 +10,12 @@ import 'package:videos_alarm_app/login_screen/splash_screen.dart';
 import 'package:videos_alarm_app/screens/Vid_controller.dart';
 import 'package:videos_alarm_app/screens/live_videos.dart';
 import 'package:videos_alarm_app/screens/view_video.dart';
-import 'package:videos_alarm_app/services/notification_services.dart';
 import 'app_store/app_pref.dart';
 
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
-  await NotificationService.backgroundHandler(message);
-}
+// Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+//   await Firebase.initializeApp();
+//   await NotificationService.backgroundHandler(message);
+// }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,10 +23,10 @@ void main() async {
     print('Starting initialization');
     await Firebase.initializeApp();
     print('Firebase initialized');
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-    print('FCM background handler set');
-    await NotificationService().initialize();
-    print('NotificationService initialized');
+    // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    // print('FCM background handler set');
+    // await NotificationService().initialize();
+    // print('NotificationService initialized');
     await AppPref.initSessionManager();
     print('Session manager initialized');
     Get.put(SubscriptionController());
@@ -37,13 +37,14 @@ void main() async {
     print('VideoController initialized');
     await _initDynamicLinks();
     print('Dynamic Links initialized');
+    await dotenv.load(fileName: ".env");
 
-    // Subscribe to FCM topics
-    FirebaseMessaging messaging = FirebaseMessaging.instance;
-    await messaging.subscribeToTopic('new_blogs');
-    await messaging.subscribeToTopic('new_videos');
-    await messaging.subscribeToTopic('new_live_videos');
-    print('Subscribed to FCM topics: new_blogs, new_videos, new_live_videos');
+    // // Subscribe to FCM topics
+    // FirebaseMessaging messaging = FirebaseMessaging.instance;
+    // await messaging.subscribeToTopic('new_blogs');
+    // await messaging.subscribeToTopic('new_videos');
+    // await messaging.subscribeToTopic('new_live_videos');
+    // print('Subscribed to FCM topics: new_blogs, new_videos, new_live_videos');
 
     runApp(const MyApp());
     print('App running');
