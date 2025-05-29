@@ -737,7 +737,7 @@ class ViewVideo extends StatelessWidget {
                                     icon: Icon(
                                       Icons.add,
                                       color: Colors.white,
-                                      size: 36,
+                                      size: 38,
                                     ),
                                   ),
                                   SizedBox(
