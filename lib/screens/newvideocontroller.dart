@@ -362,20 +362,32 @@ class ViewVideoController extends GetxController with WidgetsBindingObserver {
 }
 
 class ViewVideo extends StatelessWidget {
-  final String? videoLink; // Main video URL for Chewie
+  final String? videoLink;
+  final String? releaseYear;
+  final String? cbfc;
+  final String? director;
+  final String? duration;
   final String? videoTitle;
   final String? description;
   final String? category;
   final String? videoId;
+  final Map<dynamic, String>? cast;
+  final bool? myList;
 
   const ViewVideo({
-    Key? key,
+    super.key,
     this.videoLink,
     this.videoTitle,
     this.description,
     this.category,
     this.videoId,
-  }) : super(key: key);
+    this.releaseYear,
+    this.director,
+    this.duration,
+    this.cbfc,
+    this.cast,
+    this.myList,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -571,6 +583,11 @@ class ViewVideo extends StatelessWidget {
                                           ?.pause();
                                       Get.off(
                                         () => ViewVideo(
+                                          releaseYear: video['releaseYear'],
+                                          cbfc: video['cbfc'],
+                                          myList: video['myList'],
+                                          duration: video['duration'],
+                                          director: video['director'],
                                           videoLink: video['videoUrl'],
                                           videoTitle: video['title'],
                                           description: video['description'],

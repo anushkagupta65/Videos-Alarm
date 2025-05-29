@@ -120,7 +120,8 @@ class HomeController extends GetxController {
       }
 
       allVideos.assignAll(videosList); // Use assignAll for RxList
-      categorizedVideosMap.assignAll(categorizedVideos); // Use assignAll for RxMap
+      categorizedVideosMap
+          .assignAll(categorizedVideos); // Use assignAll for RxMap
       isLoading.value = false;
     } catch (error) {
       isLoading.value = false;
@@ -172,7 +173,8 @@ class HomeController extends GetxController {
         categoryTitle.value = 'Latest Songs';
         break;
       default:
-        categoryTitle.value = 'Latest ' + category; //For if other categories exist
+        categoryTitle.value =
+            'Latest ' + category; //For if other categories exist
         break;
     }
   }
@@ -247,10 +249,13 @@ class Home extends StatelessWidget {
                 return Container(
                   width: 8.0,
                   height: 8.0,
-                  margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                  margin: const EdgeInsets.symmetric(
+                      vertical: 8.0, horizontal: 4.0),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: controller.currentBannerIndex.value == entry.key ? Colors.white : Colors.grey[600]!,
+                    color: controller.currentBannerIndex.value == entry.key
+                        ? Colors.white
+                        : Colors.grey[600]!,
                   ),
                 );
               }).toList(),
@@ -279,7 +284,7 @@ class Home extends StatelessWidget {
         borderRadius: BorderRadius.circular(15.0),
         child: Image.network(
           imageUrl,
-          fit: BoxFit.cover,
+          fit: BoxFit.contain,
           width: double.infinity,
         ),
       ),
@@ -294,7 +299,10 @@ class Home extends StatelessWidget {
         child: Row(
           children: [
             _categoryButton('All', Icons.all_inclusive_rounded),
-            ...controller.categorizedVideosMap.keys.toList().where((category) => category != 'live').map((category) {
+            ...controller.categorizedVideosMap.keys
+                .toList()
+                .where((category) => category != 'live')
+                .map((category) {
               return _categoryButton(category, Icons.movie_filter_rounded);
             }).toList(),
           ],
@@ -352,6 +360,11 @@ class Home extends StatelessWidget {
       child: GestureDetector(
         onTap: () {
           Get.to(() => ViewVideo(
+                releaseYear: video['releaseYear'],
+                cbfc: video['cbfc'],
+                myList: video['myList'],
+                duration: video['duration'],
+                director: video['director'],
                 videoTitle: video['title'].toString(),
                 description: video['description'],
                 videoLink: video['videoUrl'],
@@ -382,30 +395,8 @@ class Home extends StatelessWidget {
                     Image.network(
                       video['thumbnailUrl'],
                       width: double.infinity,
-                      height: 200,
-                      fit: BoxFit.cover,
-                    ),
-                    Positioned(
-                      top: 8,
-                      left: 8,
-                      right: 8,
-                      child: Text(
-                        video['title'],
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          shadows: [
-                            Shadow(
-                              blurRadius: 3.0,
-                              color: Colors.black,
-                              offset: Offset(1.0, 1.0),
-                            ),
-                          ],
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      height: 230,
+                      fit: BoxFit.fill,
                     ),
                     Positioned(
                         bottom: 8,
@@ -428,7 +419,10 @@ class Home extends StatelessWidget {
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
-                          colors: [Colors.black.withOpacity(0.4), Colors.transparent],
+                          colors: [
+                            Colors.black.withOpacity(0.4),
+                            Colors.transparent
+                          ],
                         ),
                       ),
                     ),
@@ -452,7 +446,9 @@ class Home extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
               decoration: BoxDecoration(
-                color: controller.selectedCategory.value == category ? Colors.deepPurpleAccent : Colors.transparent,
+                color: controller.selectedCategory.value == category
+                    ? Colors.deepPurpleAccent
+                    : Colors.transparent,
                 borderRadius: BorderRadius.circular(30),
                 border: Border.all(
                   color: Colors.deepPurpleAccent.withOpacity(0.6),
@@ -461,12 +457,18 @@ class Home extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(icon, color: controller.selectedCategory.value == category ? whiteColor : greyColor, size: 19),
+                  Icon(icon,
+                      color: controller.selectedCategory.value == category
+                          ? whiteColor
+                          : greyColor,
+                      size: 19),
                   const SizedBox(width: 7),
                   Text(
                     category,
                     style: TextStyle(
-                      color: controller.selectedCategory.value == category ? whiteColor : greyColor,
+                      color: controller.selectedCategory.value == category
+                          ? whiteColor
+                          : greyColor,
                       fontWeight: FontWeight.w500,
                       fontSize: 15,
                     ),

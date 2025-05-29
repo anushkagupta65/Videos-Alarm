@@ -423,19 +423,31 @@ class _SubscriptionAlertState extends State<SubscriptionAlert> {
 
 class ViewVideo extends StatelessWidget {
   final String? videoLink;
+  final String? releaseYear;
+  final String? cbfc;
+  final String? director;
+  final String? duration;
   final String? videoTitle;
   final String? description;
   final String? category;
   final String? videoId;
+  final Map<dynamic, String>? cast;
+  final bool? myList;
 
   const ViewVideo({
-    Key? key,
+    super.key,
     this.videoLink,
     this.videoTitle,
     this.description,
     this.category,
     this.videoId,
-  }) : super(key: key);
+    this.releaseYear,
+    this.director,
+    this.duration,
+    this.cbfc,
+    this.cast,
+    this.myList,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -512,16 +524,241 @@ class ViewVideo extends StatelessWidget {
                                           child: CircularProgressIndicator(
                                               color: Colors.white),
                                         )),
-                              if (!controller.isAdPlaying.value &&
-                                  controller.chewieController.value != null)
-                                Positioned(
-                                  top: 3,
-                                  right: 38,
-                                  child: IconButton(
+                              // if (!controller.isAdPlaying.value &&
+                              //     controller.chewieController.value != null)
+                              //   Positioned(
+                              //     top: 3,
+                              //     right: 38,
+                              //     child: IconButton(
+                              //       icon: const Icon(
+                              //         Icons.share,
+                              //         color: Colors.white,
+                              //         size: 18,
+                              //       ),
+                              //       onPressed: () async {
+                              //         try {
+                              //           final videoID = videoId ?? '';
+                              //           final videoDoc = await FirebaseFirestore
+                              //               .instance
+                              //               .collection('videos')
+                              //               .doc(videoID)
+                              //               .get();
+
+                              //           final thumbnailURL =
+                              //               videoDoc.data()?['thumbnailUrl']
+                              //                       as String? ??
+                              //                   '';
+
+                              //           final dynamicLinkService =
+                              //               DynamicLinkService();
+                              //           final deepLink =
+                              //               await dynamicLinkService
+                              //                   .createShareVideoLink(
+                              //             videoId: videoID,
+                              //             videoTitle:
+                              //                 videoTitle ?? 'Videos Alarm',
+                              //             videoDescription: description ??
+                              //                 'Check out this amazing video on Videos Alarm!',
+                              //             thumbnailUrl: thumbnailURL,
+                              //           );
+
+                              //           debugPrint(
+                              //               "VIEW VIDEO: Dynamic Link: $deepLink");
+
+                              //           if (deepLink.isNotEmpty) {
+                              //             Share.share(
+                              //               'Tap on the below link to watch a video\n\n'
+                              //               '$deepLink\n'
+                              //               '\n'
+                              //               'Sent by VideosAlarm.',
+                              //               subject: 'Check out this video!',
+                              //             );
+                              //           }
+                              //         } catch (e) {
+                              //           debugPrint(
+                              //               "Error creating/sharing dynamic link: $e");
+                              //           ScaffoldMessenger.of(context)
+                              //               .showSnackBar(
+                              //             SnackBar(
+                              //               content: Text(
+                              //                   'Failed to share video: $e'),
+                              //             ),
+                              //           );
+                              //         }
+                              //       },
+                              //       style: IconButton.styleFrom(
+                              //         backgroundColor:
+                              //             Colors.black.withOpacity(0.5),
+                              //         padding: const EdgeInsets.all(8),
+                              //         shape: RoundedRectangleBorder(
+                              //           borderRadius: BorderRadius.circular(8),
+                              //         ),
+                              //       ),
+                              //     ),
+                              //   ),
+                            ],
+                          ),
+                        ),
+                        if (controller.isAdPlaying.value) ...[
+                          Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  'Advertisement',
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 14),
+                                ),
+                                Obx(() {
+                                  final remaining =
+                                      (controller.currentAd.value?.duration ??
+                                              Duration.zero) -
+                                          (controller.adYoutubePlayerController
+                                                  .value?.value.position ??
+                                              Duration.zero);
+                                  return Text(
+                                    'Ad: ${remaining.inSeconds}s',
+                                    style: const TextStyle(
+                                        color: Colors.white, fontSize: 14),
+                                  );
+                                }),
+                              ],
+                            ),
+                          ),
+                        ],
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
+                          child: Text(
+                            videoTitle ?? "No Title",
+                            style: const TextStyle(
+                              fontSize: 22,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        if (releaseYear != null ||
+                            cbfc != null ||
+                            duration != null) ...[
+                          Padding(
+                            padding:
+                                const EdgeInsets.only(left: 16, bottom: 12),
+                            child: Row(
+                              children: [
+                                if (releaseYear != null) ...[
+                                  Text(
+                                    releaseYear!,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      color: Colors.white70,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                ],
+                                if (cbfc != null) ...[
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade800,
+                                      border: Border.all(),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      cbfc!,
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        color: Colors.white70,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                ],
+                                if (duration != null)
+                                  Text(
+                                    duration!,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      color: Colors.white70,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(
+                            description ?? "No Description",
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: StreamBuilder<DocumentSnapshot>(
+                            stream: FirebaseFirestore.instance
+                                .collection('videos')
+                                .doc(videoId)
+                                .snapshots(),
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData) {
+                                return const Text('Views: Loading...',
+                                    style: TextStyle(color: Colors.white));
+                              }
+                              final views = snapshot.data!['views'] ?? 0;
+                              return Text('Views: $views',
+                                  style:
+                                      const TextStyle(color: Colors.white70));
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Column(
+                                children: [
+                                  IconButton(
+                                    onPressed: () {},
+                                    icon: Icon(
+                                      Icons.add,
+                                      color: Colors.white,
+                                      size: 36,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 12,
+                                  ),
+                                  Text(
+                                    "My List",
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Column(
+                                children: [
+                                  IconButton(
                                     icon: const Icon(
                                       Icons.share,
                                       color: Colors.white,
-                                      size: 18,
+                                      size: 32,
                                     ),
                                     onPressed: () async {
                                       try {
@@ -574,85 +811,20 @@ class ViewVideo extends StatelessWidget {
                                         );
                                       }
                                     },
-                                    style: IconButton.styleFrom(
-                                      backgroundColor:
-                                          Colors.black.withOpacity(0.5),
-                                      padding: const EdgeInsets.all(8),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
+                                  ),
+                                  SizedBox(
+                                    height: 12,
+                                  ),
+                                  Text(
+                                    "Share",
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.white,
                                     ),
                                   ),
-                                ),
+                                ],
+                              )
                             ],
-                          ),
-                        ),
-                        if (controller.isAdPlaying.value) ...[
-                          Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text(
-                                  'Advertisement',
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 14),
-                                ),
-                                Obx(() {
-                                  final remaining =
-                                      (controller.currentAd.value?.duration ??
-                                              Duration.zero) -
-                                          (controller.adYoutubePlayerController
-                                                  .value?.value.position ??
-                                              Duration.zero);
-                                  return Text(
-                                    'Ad: ${remaining.inSeconds}s',
-                                    style: const TextStyle(
-                                        color: Colors.white, fontSize: 14),
-                                  );
-                                }),
-                              ],
-                            ),
-                          ),
-                        ],
-                        Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Text(
-                            videoTitle ?? "No Title",
-                            style: const TextStyle(
-                              fontSize: 22,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
-                            description ?? "No Description",
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.white70,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: StreamBuilder<DocumentSnapshot>(
-                            stream: FirebaseFirestore.instance
-                                .collection('videos')
-                                .doc(videoId)
-                                .snapshots(),
-                            builder: (context, snapshot) {
-                              if (!snapshot.hasData) {
-                                return const Text('Views: Loading...',
-                                    style: TextStyle(color: Colors.white));
-                              }
-                              final views = snapshot.data!['views'] ?? 0;
-                              return Text('Views: $views',
-                                  style: const TextStyle(color: Colors.white));
-                            },
                           ),
                         ),
                         const SizedBox(height: 20),
@@ -683,6 +855,11 @@ class ViewVideo extends StatelessWidget {
                                           ?.pause();
                                       Get.off(
                                         () => ViewVideo(
+                                          releaseYear: video['releaseYear'],
+                                          cbfc: video['cbfc'],
+                                          myList: video['myList'],
+                                          duration: video['duration'],
+                                          director: video['director'],
                                           videoLink: video['videoUrl'],
                                           videoTitle: video['title'],
                                           description: video['description'],

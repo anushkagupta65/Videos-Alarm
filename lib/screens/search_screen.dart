@@ -44,12 +44,17 @@ class _SearchScreenState extends State<SearchScreen> {
         }
 
         var video = {
+          "releaseYear": data['releaseYear'],
+          "cbfc": data['cbfc'],
+          "myList": data['myList'],
+          "duration": data['duration'],
+          "director": data['director'],
           "title": data["title"],
           "description": data["description"],
           "category": data["category"],
           "videoUrl": data["videoUrl"],
           "thumbnailUrl": data["thumbnailUrl"],
-          'videoId': doc.id,  // doc.id contains the DOCUMENT ID.
+          'videoId': doc.id, // doc.id contains the DOCUMENT ID.
         };
 
         String category = data["category"];
@@ -216,6 +221,14 @@ class _SearchScreenState extends State<SearchScreen> {
                                                   MaterialPageRoute(
                                                     builder: (context) =>
                                                         ViewVideo(
+                                                      releaseYear:
+                                                          video['releaseYear'],
+                                                      cbfc: video['cbfc'],
+                                                      myList: video['myList'],
+                                                      duration:
+                                                          video['duration'],
+                                                      director:
+                                                          video['director'],
                                                       videoTitle: video['title']
                                                           .toString(),
                                                       description:
@@ -224,7 +237,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                                           video['videoUrl'],
                                                       category:
                                                           video['category'],
-                                                          videoId: video['videoId'],
+                                                      videoId: video['videoId'],
                                                     ),
                                                   ),
                                                 );

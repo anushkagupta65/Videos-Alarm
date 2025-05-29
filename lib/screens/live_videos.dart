@@ -113,7 +113,7 @@ class VideoItem {
   });
 
   factory VideoItem.fromJson(Map<String, dynamic> json) {
-    Timestamp? createdAtTimestamp = json['createdAt'] as Timestamp?;
+    Timestamp? createdAtTimestamp = json['releaseDate'] as Timestamp?;
     DateTime createdAtDateTime = createdAtTimestamp != null
         ? createdAtTimestamp.toDate()
         : DateTime.now();

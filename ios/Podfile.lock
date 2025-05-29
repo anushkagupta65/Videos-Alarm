@@ -1158,9 +1158,14 @@ PODS:
   - connectivity_plus (0.0.1):
     - Flutter
     - FlutterMacOS
+  - Firebase/Analytics (11.2.0):
+    - Firebase/Core
   - Firebase/Auth (11.2.0):
     - Firebase/CoreOnly
     - FirebaseAuth (~> 11.2.0)
+  - Firebase/Core (11.2.0):
+    - Firebase/CoreOnly
+    - FirebaseAnalytics (~> 11.2.0)
   - Firebase/CoreOnly (11.2.0):
     - FirebaseCore (= 11.2.0)
   - Firebase/DynamicLinks (11.2.0):
@@ -1175,6 +1180,10 @@ PODS:
   - Firebase/Storage (11.2.0):
     - Firebase/CoreOnly
     - FirebaseStorage (~> 11.2.0)
+  - firebase_analytics (11.3.3):
+    - Firebase/Analytics (= 11.2.0)
+    - firebase_core
+    - Flutter
   - firebase_auth (5.3.1):
     - Firebase/Auth (= 11.2.0)
     - firebase_core
@@ -1194,6 +1203,24 @@ PODS:
     - Firebase/Storage (= 11.2.0)
     - firebase_core
     - Flutter
+  - FirebaseAnalytics (11.2.0):
+    - FirebaseAnalytics/AdIdSupport (= 11.2.0)
+    - FirebaseCore (~> 11.0)
+    - FirebaseInstallations (~> 11.0)
+    - GoogleUtilities/AppDelegateSwizzler (~> 8.0)
+    - GoogleUtilities/MethodSwizzler (~> 8.0)
+    - GoogleUtilities/Network (~> 8.0)
+    - "GoogleUtilities/NSData+zlib (~> 8.0)"
+    - nanopb (~> 3.30910.0)
+  - FirebaseAnalytics/AdIdSupport (11.2.0):
+    - FirebaseCore (~> 11.0)
+    - FirebaseInstallations (~> 11.0)
+    - GoogleAppMeasurement (= 11.2.0)
+    - GoogleUtilities/AppDelegateSwizzler (~> 8.0)
+    - GoogleUtilities/MethodSwizzler (~> 8.0)
+    - GoogleUtilities/Network (~> 8.0)
+    - "GoogleUtilities/NSData+zlib (~> 8.0)"
+    - nanopb (~> 3.30910.0)
   - FirebaseAppCheckInterop (11.11.0)
   - FirebaseAuth (11.2.0):
     - FirebaseAppCheckInterop (~> 11.0)
@@ -1272,6 +1299,26 @@ PODS:
   - fluttertoast (0.0.2):
     - Flutter
     - Toast
+  - GoogleAppMeasurement (11.2.0):
+    - GoogleAppMeasurement/AdIdSupport (= 11.2.0)
+    - GoogleUtilities/AppDelegateSwizzler (~> 8.0)
+    - GoogleUtilities/MethodSwizzler (~> 8.0)
+    - GoogleUtilities/Network (~> 8.0)
+    - "GoogleUtilities/NSData+zlib (~> 8.0)"
+    - nanopb (~> 3.30910.0)
+  - GoogleAppMeasurement/AdIdSupport (11.2.0):
+    - GoogleAppMeasurement/WithoutAdIdSupport (= 11.2.0)
+    - GoogleUtilities/AppDelegateSwizzler (~> 8.0)
+    - GoogleUtilities/MethodSwizzler (~> 8.0)
+    - GoogleUtilities/Network (~> 8.0)
+    - "GoogleUtilities/NSData+zlib (~> 8.0)"
+    - nanopb (~> 3.30910.0)
+  - GoogleAppMeasurement/WithoutAdIdSupport (11.2.0):
+    - GoogleUtilities/AppDelegateSwizzler (~> 8.0)
+    - GoogleUtilities/MethodSwizzler (~> 8.0)
+    - GoogleUtilities/Network (~> 8.0)
+    - "GoogleUtilities/NSData+zlib (~> 8.0)"
+    - nanopb (~> 3.30910.0)
   - GoogleDataTransport (10.1.0):
     - nanopb (~> 3.30910.0)
     - PromisesObjC (~> 2.4)
@@ -1284,6 +1331,9 @@ PODS:
     - GoogleUtilities/Privacy
   - GoogleUtilities/Logger (8.0.2):
     - GoogleUtilities/Environment
+    - GoogleUtilities/Privacy
+  - GoogleUtilities/MethodSwizzler (8.0.2):
+    - GoogleUtilities/Logger
     - GoogleUtilities/Privacy
   - GoogleUtilities/Network (8.0.2):
     - GoogleUtilities/Logger
@@ -1410,6 +1460,10 @@ PODS:
     - Flutter
     - FlutterMacOS
   - PromisesObjC (2.4.0)
+  - razorpay-pod (1.4.0)
+  - razorpay_flutter (1.1.10):
+    - Flutter
+    - razorpay-pod
   - RecaptchaInterop (100.0.0)
   - share_plus (0.0.1):
     - Flutter
@@ -1433,6 +1487,7 @@ PODS:
 DEPENDENCIES:
   - cloud_firestore (from `.symlinks/plugins/cloud_firestore/ios`)
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/darwin`)
+  - firebase_analytics (from `.symlinks/plugins/firebase_analytics/ios`)
   - firebase_auth (from `.symlinks/plugins/firebase_auth/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_dynamic_links (from `.symlinks/plugins/firebase_dynamic_links/ios`)
@@ -1447,6 +1502,7 @@ DEPENDENCIES:
   - in_app_purchase_storekit (from `.symlinks/plugins/in_app_purchase_storekit/darwin`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
+  - razorpay_flutter (from `.symlinks/plugins/razorpay_flutter/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sms_autofill (from `.symlinks/plugins/sms_autofill/ios`)
@@ -1457,7 +1513,10 @@ DEPENDENCIES:
 
 SPEC REPOS:
   https://github.com/CocoaPods/Specs.git:
+    - FirebaseAnalytics
+    - GoogleAppMeasurement
     - GTMSessionFetcher
+    - razorpay-pod
   trunk:
     - abseil
     - BoringSSL-GRPC
@@ -1491,6 +1550,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/cloud_firestore/ios"
   connectivity_plus:
     :path: ".symlinks/plugins/connectivity_plus/darwin"
+  firebase_analytics:
+    :path: ".symlinks/plugins/firebase_analytics/ios"
   firebase_auth:
     :path: ".symlinks/plugins/firebase_auth/ios"
   firebase_core:
@@ -1517,6 +1578,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/package_info_plus/ios"
   path_provider_foundation:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
+  razorpay_flutter:
+    :path: ".symlinks/plugins/razorpay_flutter/ios"
   share_plus:
     :path: ".symlinks/plugins/share_plus/ios"
   shared_preferences_foundation:
@@ -1538,11 +1601,13 @@ SPEC CHECKSUMS:
   cloud_firestore: 5cb927f1a8c9d748d6fdbf16c6b267956cb82c53
   connectivity_plus: 4c41c08fc6d7c91f63bc7aec70ffe3730b04f563
   Firebase: 98e6bf5278170668a7983e12971a66b2cd57fc8c
+  firebase_analytics: fbc57838bdb94eef1e0ff504f127d974ff2981ad
   firebase_auth: 0c77e299a8f2d1c74d1b1f6b78b3d4d802c19f47
   firebase_core: 2bedc3136ec7c7b8561c6123ed0239387b53f2af
   firebase_dynamic_links: 31addc071dc0e3ebd7a8f969b5e592636200b7c1
   firebase_messaging: 15d114e1a41fc31e4fbabcd48d765a19eec94a38
   firebase_storage: cee0d3d2e947db11289bbb57ed73a447ea111ec1
+  FirebaseAnalytics: c36efd5710c60c17558650fa58c2066eca7e9265
   FirebaseAppCheckInterop: f23709c9ce92d810aa53ff4ce12ad3e666a3c7be
   FirebaseAuth: 2a198b8cdbbbd457f08d74df7040feb0a0e7777a
   FirebaseAuthInterop: ac22ed402c2f4e3a8c63ebd3278af9a06073c1be
@@ -1561,6 +1626,7 @@ SPEC CHECKSUMS:
   flutter_local_notifications: df98d66e515e1ca797af436137b4459b160ad8c9
   flutter_secure_storage: d33dac7ae2ea08509be337e775f6b59f1ff45f12
   fluttertoast: e9a18c7be5413da53898f660530c56f35edfba9c
+  GoogleAppMeasurement: 76d4f8b36b03bd8381fa9a7fe2cc7f99c0a2e93a
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
   GoogleUtilities: 26a3abef001b6533cf678d3eb38fd3f614b7872d
   "gRPC-C++": 2fa52b3141e7789a28a737f251e0c45b4cb20a87
@@ -1573,6 +1639,8 @@ SPEC CHECKSUMS:
   package_info_plus: c0502532a26c7662a62a356cebe2692ec5fe4ec4
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
+  razorpay-pod: cb5b5439697bdda9c57d68a92b3e5b0ce1d2f2f3
+  razorpay_flutter: 84b3bfd206ae9c9c2a9ba585524a1b3d8102b6c1
   RecaptchaInterop: 7d1a4a01a6b2cb1610a47ef3f85f0c411434cb21
   share_plus: 8b6f8b3447e494cca5317c8c3073de39b3600d1f
   shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
@@ -1583,6 +1651,6 @@ SPEC CHECKSUMS:
   video_player_avfoundation: 7c6c11d8470e1675df7397027218274b6d2360b3
   wakelock_plus: 78ec7c5b202cab7761af8e2b2b3d0671be6c4ae1
 
-PODFILE CHECKSUM: 2a3a39882884b9f52b3f3aaeb170c73fb7ac569c
+PODFILE CHECKSUM: a1e2a971add45074f5064d23e6f5a86f122ec176
 
 COCOAPODS: 1.16.2

@@ -2,8 +2,8 @@ name: videos_alarm_app
 description: A new Flutter project.
 publish_to: "none"
 
-version: 1.2.3+24 #Version for Android (Uncomment this while uploading to Play Store)
-# version: 2.0.1+2 #Version for iOS  (Uncomment this while uploading to App Store)
+version: 1.2.5+26 #Version for Android (Uncomment this while uploading to Play Store)
+# version: 2.1.1+6 #Version for iOS  (Uncomment this while uploading to App Store)
 
 environment:
   sdk: ">=3.0.6 <4.0.0"
@@ -11,7 +11,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.2
   dio: ^5.2.1+1
   retrofit_generator: ^8.2.1
   json_serializable: ^6.7.1
@@ -47,7 +46,7 @@ dependencies:
   flutter_local_notifications: ^18.0.0
   razorpay_flutter: ^1.4.0
   flutter_dotenv: ^5.2.1
-  # google_sign_in: ^6.3.0
+  firebase_analytics: ^11.3.3
 
 dependency_overrides:
   smart_popup: ^3.0.4

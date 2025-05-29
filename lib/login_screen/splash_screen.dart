@@ -20,24 +20,22 @@ class SplashScreen extends StatefulWidget {
 }
 
 class SplashScreenState extends State<SplashScreen> {
-  final VideoController videoController = Get.put(VideoController());
-  final SubscriptionController subscriptionController =
-      Get.find<SubscriptionController>();
+  // final VideoController videoController = Get.put(VideoController());
+  // final SubscriptionController subscriptionController =
+  //     Get.find<SubscriptionController>();
 
   void navigationToDashboard() {
-    Future.delayed(
-      
-      const Duration(seconds: 2), () async {
+    Future.delayed(const Duration(seconds: 2), () async {
       User? currentUser = FirebaseAuth.instance.currentUser;
-      SubscriptionService().checkSubscriptionStatus();
+      // SubscriptionService().checkSubscriptionStatus();
 
-      videoController.checkUserActiveStatus();
+      // videoController.checkUserActiveStatus();
 
       if (currentUser == null) {
         Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (context) => LogInScreen()));
       } else {
-        SubscriptionService().checkSubscriptionStatus();
+        // SubscriptionService().checkSubscriptionStatus();
 
         Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (context) => BottomBarTabs()));

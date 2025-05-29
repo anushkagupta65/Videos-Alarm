@@ -33,11 +33,13 @@ class WatchLaterPage extends StatelessWidget {
         itemBuilder: (context, index) {
           var video = watchLaterVideos[index];
 
-          bool hasValidData = video['videoUrl'] != null && video['title'] != null && video['description'] != null;
+          bool hasValidData = video['videoUrl'] != null &&
+              video['title'] != null &&
+              video['description'] != null;
 
           return ListTile(
             title: Text(video['title'] ?? 'No title'),
-            subtitle: Text('Created on: ${_formatDate(video['createdAt'])}'),
+            subtitle: Text('Created on: ${_formatDate(video['releaseDate'])}'),
             onTap: () {
               print('Tapped on video: ${video['title']}');
               if (hasValidData) {
@@ -45,6 +47,11 @@ class WatchLaterPage extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => ViewVideo(
+                      releaseYear: video['releaseYear'],
+                      cbfc: video['cbfc'],
+                      myList: video['myList'],
+                      duration: video['duration'],
+                      director: video['director'],
                       videoLink: video['videoUrl'],
                       videoTitle: video['title'],
                       description: video['description'],

@@ -31,13 +31,16 @@ class BottomBarTabsState extends State<BottomBarTabs> {
     const Settings(),
   ];
 
-  final SubscriptionController subscriptionController =
-      Get.find<SubscriptionController>();
+  // Initialize SubscriptionController here instead of Get.find
+  late SubscriptionController subscriptionController;
+
   bool _hasRestoredPurchases = false;
 
   @override
   void initState() {
     super.initState();
+    // Initialize the controller after reaching BottomBarTabs
+    subscriptionController = Get.put(SubscriptionController());
     _checkRestoredPurchases();
   }
 

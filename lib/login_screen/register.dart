@@ -133,7 +133,7 @@ class _RegisterState extends State<Register> {
       });
       commToast('Registration Successful! (Simulated)');
       Get.offAll(() => BottomBarTabs(initialIndex: 0));
-      return; // Exit early
+      return;
     }
 
     const String apiUrl = 'http://165.22.215.103:3066/verifyOtp';

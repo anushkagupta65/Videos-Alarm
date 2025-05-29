@@ -75,19 +75,19 @@ class _SettingsState extends State<Settings> {
               },
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
-            child: ListTile(
-              title: const Text("Subscriptions"),
-              titleTextStyle: TextStyle(color: whiteColor),
-              tileColor: whiteColor.withOpacity(0.05),
-              trailing:
-                  Icon(Icons.arrow_forward_ios, size: 16, color: whiteColor),
-              onTap: () async {
-                Get.to(() => SubscriptionsScreen());
-              },
-            ),
-          ),
+          // Padding(
+          //   padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
+          //   child: ListTile(
+          //     title: const Text("Subscriptions"),
+          //     titleTextStyle: TextStyle(color: whiteColor),
+          //     tileColor: whiteColor.withOpacity(0.05),
+          //     trailing:
+          //         Icon(Icons.arrow_forward_ios, size: 16, color: whiteColor),
+          //     onTap: () async {
+          //       Get.to(() => SubscriptionsScreen());
+          //     },
+          //   ),
+          // ),
           Padding(
             padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
             child: ListTile(
@@ -153,7 +153,7 @@ class _SettingsState extends State<Settings> {
                   'Are you sure you want to delete your account?',
                   style: TextStyle(color: whiteColor),
                 ),
-                 Text(
+                Text(
                   'This action cannot be undone.',
                   style: TextStyle(color: whiteColor),
                 ),
@@ -162,7 +162,7 @@ class _SettingsState extends State<Settings> {
           ),
           actions: <Widget>[
             TextButton(
-              child:  Text(
+              child: Text(
                 'Cancel',
                 style: TextStyle(color: whiteColor),
               ),
@@ -199,10 +199,9 @@ class _SettingsState extends State<Settings> {
 
         // 2. Sign out the user
         await FirebaseAuth.instance.signOut();
-        commToast("Account marked for deletion. Please log in again to permanently delete your account");
+        commToast(
+            "Account marked for deletion. Please log in again to permanently delete your account");
         Get.offAll(() => LogInScreen());
-
-
       } else {
         commToast("No user is currently logged in.");
       }
