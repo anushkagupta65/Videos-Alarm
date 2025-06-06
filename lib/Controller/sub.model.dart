@@ -3,7 +3,7 @@ class SubscriptionPlan {
   final String name;
   final String description;
   final int durationInDays;
-  final String price; 
+  final String price;
 
   SubscriptionPlan({
     required this.id,
@@ -18,7 +18,7 @@ class SubscriptionPlan {
       id: 'vip_plan_id',
       name: 'Premium Plan',
       description: 'Access to standard videos.',
-      durationInDays: 30,
+      durationInDays: 365,
       price: '\$4.99',
     ),
     SubscriptionPlan(
@@ -26,7 +26,7 @@ class SubscriptionPlan {
       name: 'Premium Plan',
       description: 'Access to all videos with premium features.',
       durationInDays: 365,
-      price: '\$49.99', 
+      price: '\$49.99',
     ),
   ];
 
@@ -44,6 +44,3 @@ class SubscriptionPlan {
     return plan?.description ?? 'No active subscription';
   }
 }
-
-
-

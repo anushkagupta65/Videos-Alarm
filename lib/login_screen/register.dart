@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:videos_alarm_app/login_screen/login_screen.dart';
 import 'package:videos_alarm_app/screens/Vid_controller.dart';
 import 'package:videos_alarm_app/screens/banner_video_list.dart';
@@ -66,7 +67,7 @@ class _RegisterState extends State<Register> {
     });
 
     // Check for the special demo number
-    if (phoneNumber == '1002003000') {
+    if (phoneNumber == '1000000000') {
       setState(() {
         isOtpSent = true;
         isLoading = false;
@@ -127,7 +128,9 @@ class _RegisterState extends State<Register> {
     });
 
     // Demo Phone Number & OTP
-    if (phone == '1002003000' && otp == '000000') {
+    if (phone == '1000000000' && otp == '000000') {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isTestUser', true);
       setState(() {
         isVerifyingOtp = false;
       });
@@ -166,7 +169,7 @@ class _RegisterState extends State<Register> {
             transaction.set(userDocRef, {
               'name': name,
               'phone': phone,
-              'createdAt': FieldValue.serverTimestamp(),
+              'releaseDate': FieldValue.serverTimestamp(),
               'lastLogin': FieldValue.serverTimestamp(),
             });
           }).then((_) {
@@ -223,7 +226,7 @@ class _RegisterState extends State<Register> {
   //   });
 
   //   // Demo Phone Number
-  //   if (phone == '1002003000' && otp == '000000') {
+  //   if (phone == '1000000000' && otp == '000000') {
   //     setState(() {
   //       isLoading = false;
   //     });

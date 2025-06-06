@@ -371,7 +371,7 @@ class ViewVideo extends StatelessWidget {
   final String? description;
   final String? category;
   final String? videoId;
-  final Map<dynamic, String>? cast;
+  final String? starcast;
   final bool? myList;
 
   const ViewVideo({
@@ -385,7 +385,7 @@ class ViewVideo extends StatelessWidget {
     this.director,
     this.duration,
     this.cbfc,
-    this.cast,
+    this.starcast,
     this.myList,
   });
 
@@ -584,6 +584,7 @@ class ViewVideo extends StatelessWidget {
                                       Get.off(
                                         () => ViewVideo(
                                           releaseYear: video['releaseYear'],
+                                          starcast: video['starcast'],
                                           cbfc: video['cbfc'],
                                           myList: video['myList'],
                                           duration: video['duration'],
@@ -642,8 +643,8 @@ class ViewVideo extends StatelessWidget {
                                   ),
                                   const SizedBox(height: 20),
                                   ElevatedButton(
-                                    onPressed: () => Get.to(
-                                        () => const SubscriptionsScreen()),
+                                    onPressed: () =>
+                                        Get.to(() => SubscriptionsScreen()),
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.blueAccent,
                                       foregroundColor: Colors.white,

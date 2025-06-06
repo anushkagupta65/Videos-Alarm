@@ -97,9 +97,9 @@ class VideoItem {
   final String actualStartTime;
   final List<String> videoTags;
   final int concurrentViewers;
-  final DateTime createdAt;
+  final DateTime releaseDate;
 
-  String get formattedCreatedAt => DateFormat('MMM dd').format(createdAt);
+  String get formattedreleaseDate => DateFormat('MMM dd').format(releaseDate);
 
   VideoItem({
     required this.videoId,
@@ -109,13 +109,13 @@ class VideoItem {
     required this.thumbnailUrl,
     required this.actualStartTime,
     required this.videoTags,
-    required this.createdAt,
+    required this.releaseDate,
   });
 
   factory VideoItem.fromJson(Map<String, dynamic> json) {
-    Timestamp? createdAtTimestamp = json['releaseDate'] as Timestamp?;
-    DateTime createdAtDateTime = createdAtTimestamp != null
-        ? createdAtTimestamp.toDate()
+    Timestamp? releaseDateTimestamp = json['releaseDatee'] as Timestamp?;
+    DateTime releaseDateDateTime = releaseDateTimestamp != null
+        ? releaseDateTimestamp.toDate()
         : DateTime.now();
 
     return VideoItem(
@@ -126,7 +126,7 @@ class VideoItem {
       actualStartTime: json['actualStartTime'] as String? ?? 'Not Available',
       videoTags: List<String>.from(json['videoTags'] as List? ?? []),
       concurrentViewers: json['concurrentViewers'] as int? ?? 0,
-      createdAt: createdAtDateTime,
+      releaseDate: releaseDateDateTime,
     );
   }
 }
@@ -309,7 +309,7 @@ class LiveVideosList extends StatelessWidget {
                     style: TextStyle(color: Colors.grey[400], fontSize: 12),
                   ),
                   Text(
-                    video.formattedCreatedAt,
+                    video.formattedreleaseDate,
                     style: TextStyle(color: Colors.grey[400], fontSize: 12),
                   ),
                 ],
@@ -359,7 +359,7 @@ class LiveVideosList extends StatelessWidget {
                   style: TextStyle(color: Colors.grey[400], fontSize: 12),
                 ),
                 Text(
-                  video.formattedCreatedAt,
+                  video.formattedreleaseDate,
                   style: TextStyle(color: Colors.grey[400], fontSize: 12),
                 ),
               ],

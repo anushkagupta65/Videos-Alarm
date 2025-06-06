@@ -1,11 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class VideoController extends GetxController {
   var isLoading = true.obs;
   var isVideoChanging = false.obs;
-  var isUserActive = true.obs;
+  var isUserActive = false.obs;
 
   var currentVideoTitle = ''.obs;
   var currentVideoDescription = ''.obs;
@@ -19,11 +20,11 @@ class VideoController extends GetxController {
   void onInit() {
     super.onInit();
     // You can put initial data loading or setup here.  For example:
-     checkUserActiveStatus(); // Load user active status on initialization.
-
+    checkUserActiveStatus(); // Load user active status on initialization.
   }
 
-  Future<void> initializeVideo(String videoTitle, String description, String videoLink) async {
+  Future<void> initializeVideo(
+      String videoTitle, String description, String videoLink) async {
     currentVideoTitle.value = videoTitle;
     currentVideoDescription.value = description;
     currentVideoLink.value = videoLink;
@@ -36,7 +37,18 @@ class VideoController extends GetxController {
       User? currentUser = FirebaseAuth.instance.currentUser;
 
       if (currentUser != null) {
-        DocumentSnapshot userDoc = await firestore.collection('users').doc(currentUser.uid).get();
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        bool isTestUser = prefs.getBool('isTestUser') ?? false;
+
+        // If test user, set active status to true and skip Firestore query
+        if (isTestUser) {
+          print(
+              "\n\n subscription controller ---- Test user detected, setting isUserActive to true");
+          isUserActive.value = false;
+          return;
+        }
+        DocumentSnapshot userDoc =
+            await firestore.collection('users').doc(currentUser.uid).get();
         if (userDoc.exists) {
           var data = userDoc.data() as Map<String, dynamic>;
           isUserActive.value = data['Active'] ?? false;
@@ -54,31 +66,38 @@ class VideoController extends GetxController {
 
       Map<String, List<Map<String, dynamic>>> categorizedVideos = {};
 
-      for (QueryDocumentSnapshot doc in querySnapshot.docs) { // Change to QueryDocumentSnapshot
+      for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+        // Change to QueryDocumentSnapshot
         var data = doc.data() as Map<String, dynamic>;
         String videoCategory = data['category'];
 
         print('this is doc id${doc.id}');
         categorizedVideos.putIfAbsent(videoCategory, () => []);
         categorizedVideos[videoCategory]?.add({
+          "releaseYear": data['releaseYear'],
+          "starcast": data['starcast'],
+          "cbfc": data['cbfc'],
+          "myList": data['myList'],
+          "duration": data['duration'],
+          "director": data['director'],
           'title': data['title'],
           'description': data['description'],
           'videoUrl': data['videoUrl'],
           'thumbnailUrl': data['thumbnailUrl'],
-          'videoId': doc.id,  // doc.id contains the DOCUMENT ID.
+          'videoId': doc.id, // doc.id contains the DOCUMENT ID.
         });
       }
 
       sameCategoryVideos.value = categorizedVideos[category] ?? [];
       categorizedVideos.remove(category);
       otherCategoryVideos.value = categorizedVideos;
-
     } catch (e) {
       print("Error fetching videos: $e");
     }
   }
 
-  Future<void> changeVideo(String videoUrl, String title, String description, String category) async {
+  Future<void> changeVideo(String videoUrl, String title, String description,
+      String category) async {
     if (isVideoChanging.value) return;
 
     isVideoChanging.value = true;

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:pin_code_fields/pin_code_fields.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:videos_alarm_app/login_screen/register.dart';
 import 'package:videos_alarm_app/screens/Vid_controller.dart';
@@ -47,28 +48,23 @@ class _LogInScreenState extends State<LogInScreen> {
     super.dispose();
   }
 
-  // Function to get the complete OTP string from the separate digit controllers
   String get _otpFromBoxes {
     return otpDigitControllers.map((controller) => controller.text).join();
   }
 
-  // --- New function to check if user exists ---
   Future<bool> checkUserExists(String phoneNumber) async {
     setState(() {
       isLoading = true;
     });
 
-    // Special Demo Number
-    if (phoneNumber == '1002003000') {
+    if (phoneNumber == '1000000000') {
       setState(() {
         isLoading = false;
       });
-      return true; // Demo user exists
+      return true;
     }
 
-    // Hypothetical API endpoint to check user existence
-    const String apiUrl =
-        'http://165.22.215.103:3066/checkUserExists'; // Replace with your actual endpoint
+    const String apiUrl = 'http://165.22.215.103:3066/checkUserExists';
 
     Map<String, String> headers = {
       'Content-Type': 'application/json',
@@ -90,15 +86,13 @@ class _LogInScreenState extends State<LogInScreen> {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
-        return responseData['exists'] ??
-            false; // Assuming your API returns a boolean 'exists'
+        return responseData['exists'] ?? false;
       } else {
-        // Handle potential backend errors during the check
         final errorBody = json.decode(response.body);
         final errorMessage =
             errorBody['message'] ?? 'Failed to check user existence';
         commToast('Error checking user: $errorMessage');
-        return false; // Assume user doesn't exist or an error occurred
+        return false;
       }
     } catch (e) {
       setState(() {
@@ -106,18 +100,16 @@ class _LogInScreenState extends State<LogInScreen> {
       });
       commToast('Error checking user: Please try again.');
       print('Error checking user existence: $e');
-      return false; // Assume user doesn't exist or an error occurred
+      return false;
     }
   }
 
   Future<void> sendOtpForLogin(String phoneNumber) async {
-    // Renamed function for clarity
     setState(() {
       isLoading = true;
     });
 
-    // Special Demo Number:  Skip API call
-    if (phoneNumber == '1002003000') {
+    if (phoneNumber == '1000000000') {
       setState(() {
         isOtpSent = true;
         isLoading = false;
@@ -148,7 +140,6 @@ class _LogInScreenState extends State<LogInScreen> {
         });
         commToast('OTP sent to $phoneNumber');
       } else {
-        // Improved error handling message
         final errorBody = json.decode(response.body);
         final errorMessage = errorBody['message'] ?? 'Failed to send OTP';
         throw Exception(errorMessage);
@@ -157,17 +148,15 @@ class _LogInScreenState extends State<LogInScreen> {
       setState(() {
         isLoading = false;
       });
-      // Display the specific error if available
       commToast(e.toString().replaceFirst('Exception: ', ''));
     }
   }
 
   Future<void> verifyOtpAndSignIn() async {
-    final String otp = _otpFromBoxes; // Get OTP from the digit boxes
+    final String otp = _otpFromBoxes;
     final String phone = phoneController.text.trim();
 
     if (otp.length != 6) {
-      // Check if all 6 digits are entered
       commToast('Please enter the 6-digit OTP');
       return;
     }
@@ -176,8 +165,9 @@ class _LogInScreenState extends State<LogInScreen> {
       isLoading = true;
     });
 
-    // Demo Phone Number & OTP
-    if (phone == '1002003000' && otp == '000000') {
+    if (phone == '1000000000' && otp == '000000') {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isTestUser', true);
       setState(() {
         isLoading = false;
       });
@@ -230,8 +220,7 @@ class _LogInScreenState extends State<LogInScreen> {
             setState(() {
               isLoading = false;
             });
-            Get.offAll(() => BottomBarTabs(
-                initialIndex: 0)); // Use offAll after successful login
+            Get.offAll(() => BottomBarTabs(initialIndex: 0));
           }).catchError((error) {
             commToast("Error updating user data: $error");
             setState(() {
@@ -245,7 +234,6 @@ class _LogInScreenState extends State<LogInScreen> {
           });
         }
       } else {
-        // Improved error handling message
         final errorBody = json.decode(response.body);
         final errorMessage = errorBody['message'] ?? 'OTP verification failed';
         commToast(errorMessage);
@@ -261,30 +249,28 @@ class _LogInScreenState extends State<LogInScreen> {
     }
   }
 
-  // --- Function to show the User Not Found Dialog ---
   void _showUserNotFoundDialog(BuildContext context) {
     showDialog(
       context: context,
-      barrierDismissible: false, // Prevent dismissing by tapping outside
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: darkColor, // Set dialog background to dark color
+          backgroundColor: darkColor,
           shape: RoundedRectangleBorder(
-            // Add rounded corners
             borderRadius: BorderRadius.circular(16.0),
-            side: BorderSide(color: Colors.white12), // Subtle border
+            side: BorderSide(color: Colors.white12),
           ),
           title: Text(
             "User Not Found",
             style: TextStyle(
-              color: whiteColor, // White color for title
+              color: whiteColor,
               fontWeight: FontWeight.bold,
             ),
           ),
           content: Text(
             "It seems you don't have an account. Would you like to register?",
             style: TextStyle(
-              color: Colors.white70, // Muted white for content text
+              color: Colors.white70,
               fontSize: 16,
             ),
           ),
@@ -292,29 +278,25 @@ class _LogInScreenState extends State<LogInScreen> {
             TextButton(
               child: Text(
                 "Cancel",
-                style:
-                    TextStyle(color: Colors.white60), // Muted color for cancel
+                style: TextStyle(color: Colors.white60),
               ),
               onPressed: () {
-                Navigator.of(context).pop(); // Dismiss the dialog
-                phoneController.clear(); // Clear the phone number field
+                Navigator.of(context).pop();
+                phoneController.clear();
               },
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    greenColor, // Green background for primary action
-                foregroundColor: blackColor, // Black text color
+                backgroundColor: greenColor,
+                foregroundColor: blackColor,
                 shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(8), // Rounded button corners
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
               child: Text("Register"),
               onPressed: () {
-                Navigator.of(context).pop(); // Dismiss the dialog
-                Get.off(() =>
-                    const Register()); // Navigate to the registration page
+                Navigator.of(context).pop();
+                Get.off(() => const Register());
               },
             ),
           ],

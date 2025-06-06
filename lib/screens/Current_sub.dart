@@ -182,11 +182,11 @@ class CurrentSubscriptionCard extends StatelessWidget {
 
             DateTime? expiryDateTime;
             if (expiryDateMillis != null) {
-              expiryDateTime =
-                  DateTime.fromMillisecondsSinceEpoch(int.parse(expiryDateMillis));
+              expiryDateTime = DateTime.fromMillisecondsSinceEpoch(
+                  int.parse(expiryDateMillis));
             }
 
-            print(expiryDateTime);
+            print("this is expiry date = $expiryDateTime");
             if (canceled) {
               if (expiryDateTime != null &&
                   DateTime.now().isBefore(expiryDateTime)) {
@@ -330,8 +330,7 @@ class CurrentSubscriptionCard extends StatelessWidget {
                   onPressed: () async {
                     if (planName != 'No Subscription') {
                       openCancellationPage();
-                    } else {
-                    }
+                    } else {}
                   },
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.teal,

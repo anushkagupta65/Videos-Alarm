@@ -8,12 +8,12 @@ class WatchLaterPage extends StatelessWidget {
   WatchLaterPage(this.watchLaterVideos);
 
   // Helper method to format date
-  String _formatDate(dynamic createdAt) {
-    if (createdAt == null) return 'Unknown date';
+  String _formatDate(dynamic releaseDate) {
+    if (releaseDate == null) return 'Unknown date';
 
     try {
-      if (createdAt is DateTime) {
-        return DateFormat('MMM dd, yyyy').format(createdAt);
+      if (releaseDate is DateTime) {
+        return DateFormat('MMM dd, yyyy').format(releaseDate);
       } else {
         return 'Invalid date format';
       }
@@ -39,7 +39,7 @@ class WatchLaterPage extends StatelessWidget {
 
           return ListTile(
             title: Text(video['title'] ?? 'No title'),
-            subtitle: Text('Created on: ${_formatDate(video['releaseDate'])}'),
+            subtitle: Text('Created on: ${_formatDate(video['releaseDatee'])}'),
             onTap: () {
               print('Tapped on video: ${video['title']}');
               if (hasValidData) {
@@ -48,6 +48,7 @@ class WatchLaterPage extends StatelessWidget {
                   MaterialPageRoute(
                     builder: (context) => ViewVideo(
                       releaseYear: video['releaseYear'],
+                      starcast: video['starcast'],
                       cbfc: video['cbfc'],
                       myList: video['myList'],
                       duration: video['duration'],

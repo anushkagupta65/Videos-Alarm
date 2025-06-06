@@ -43,7 +43,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         enableCaption: true,
       ),
     )..addListener(_onPlayerStateChange);
-    
+
     Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted) {
         setState(() {
@@ -59,7 +59,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         setState(() {
           _isFullScreen = _controller.value.isFullScreen;
         });
-        
+
         if (_isFullScreen) {
           SystemChrome.setPreferredOrientations([
             DeviceOrientation.landscapeLeft,
@@ -107,49 +107,53 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       },
       child: Scaffold(
         backgroundColor: const Color(0xFF121212),
-        appBar: _isFullScreen 
-          ? null 
-          : AppBar(
-              foregroundColor: Colors.white,
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              systemOverlayStyle: SystemUiOverlayStyle.light,
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () {
-                  _stopVideo(); // Stop video when back button is pressed
-                  Navigator.of(context).pop();
-                },
-              ),
-              title: Text(
-                'VideosAlarm live',
-                style: GoogleFonts.montserrat(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 18,
+        appBar: _isFullScreen
+            ? null
+            : AppBar(
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                systemOverlayStyle: SystemUiOverlayStyle.light,
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () {
+                    _stopVideo(); // Stop video when back button is pressed
+                    Navigator.of(context).pop();
+                  },
                 ),
-                overflow: TextOverflow.ellipsis,
+                title: Text(
+                  'VideosAlarm live',
+                  style: GoogleFonts.montserrat(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 18,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                centerTitle: true,
               ),
-              centerTitle: true,
-            ),
         body: Stack(
           children: [
             SingleChildScrollView(
-              physics: _isFullScreen ? const NeverScrollableScrollPhysics() : null,
+              physics:
+                  _isFullScreen ? const NeverScrollableScrollPhysics() : null,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   YoutubePlayerBuilder(
                     onExitFullScreen: () {
-                      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-                      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+                      SystemChrome.setPreferredOrientations(
+                          [DeviceOrientation.portraitUp]);
+                      SystemChrome.setEnabledSystemUIMode(
+                          SystemUiMode.edgeToEdge);
                     },
                     onEnterFullScreen: () {
                       SystemChrome.setPreferredOrientations([
                         DeviceOrientation.landscapeLeft,
                         DeviceOrientation.landscapeRight,
                       ]);
-                      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+                      SystemChrome.setEnabledSystemUIMode(
+                          SystemUiMode.immersiveSticky);
                     },
                     player: YoutubePlayer(
                       controller: _controller,
@@ -202,18 +206,24 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                                   const SizedBox(height: 8),
                                   Row(
                                     children: [
-                                      Icon(Icons.remove_red_eye, color: Colors.grey[600], size: 16),
+                                      Icon(Icons.remove_red_eye,
+                                          color: Colors.grey[600], size: 16),
                                       const SizedBox(width: 4),
                                       Text(
                                         '${widget.video.concurrentViewers} views',
-                                        style: GoogleFonts.roboto(color: Colors.grey[600], fontSize: 12),
+                                        style: GoogleFonts.roboto(
+                                            color: Colors.grey[600],
+                                            fontSize: 12),
                                       ),
                                       const SizedBox(width: 12),
-                                      Icon(Icons.calendar_today, color: Colors.grey[600], size: 16),
+                                      Icon(Icons.calendar_today,
+                                          color: Colors.grey[600], size: 16),
                                       const SizedBox(width: 4),
                                       Text(
-                                        widget.video.formattedCreatedAt,
-                                        style: GoogleFonts.roboto(color: Colors.grey[600], fontSize: 12),
+                                        widget.video.formattedreleaseDate,
+                                        style: GoogleFonts.roboto(
+                                            color: Colors.grey[600],
+                                            fontSize: 12),
                                       ),
                                     ],
                                   ),
@@ -223,14 +233,18 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                                     runSpacing: 4.0,
                                     children: widget.video.videoTags.map((tag) {
                                       return Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 10, vertical: 4),
                                         decoration: BoxDecoration(
                                           color: Colors.grey[800],
-                                          borderRadius: BorderRadius.circular(16),
+                                          borderRadius:
+                                              BorderRadius.circular(16),
                                         ),
                                         child: Text(
                                           tag,
-                                          style: GoogleFonts.roboto(color: Colors.grey[400], fontSize: 12),
+                                          style: GoogleFonts.roboto(
+                                              color: Colors.grey[400],
+                                              fontSize: 12),
                                         ),
                                       );
                                     }).toList(),
@@ -250,7 +264,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                                     child: ConstrainedBox(
                                       constraints: _showFullDescription
                                           ? const BoxConstraints()
-                                          : const BoxConstraints(maxHeight: 120),
+                                          : const BoxConstraints(
+                                              maxHeight: 120),
                                       child: Text(
                                         widget.video.description,
                                         style: GoogleFonts.openSans(
@@ -268,13 +283,17 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                                       onPressed: () {
                                         if (mounted) {
                                           setState(() {
-                                            _showFullDescription = !_showFullDescription;
+                                            _showFullDescription =
+                                                !_showFullDescription;
                                           });
                                         }
                                       },
                                       child: Text(
-                                        _showFullDescription ? 'Show Less' : 'Show More',
-                                        style: const TextStyle(color: Colors.blue),
+                                        _showFullDescription
+                                            ? 'Show Less'
+                                            : 'Show More',
+                                        style:
+                                            const TextStyle(color: Colors.blue),
                                       ),
                                     ),
                                 ],

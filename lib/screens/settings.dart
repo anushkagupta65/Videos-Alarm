@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:videos_alarm_app/components/common_toast.dart';
 import 'package:videos_alarm_app/login_screen/login_screen.dart';
@@ -75,19 +76,19 @@ class _SettingsState extends State<Settings> {
               },
             ),
           ),
-          // Padding(
-          //   padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
-          //   child: ListTile(
-          //     title: const Text("Subscriptions"),
-          //     titleTextStyle: TextStyle(color: whiteColor),
-          //     tileColor: whiteColor.withOpacity(0.05),
-          //     trailing:
-          //         Icon(Icons.arrow_forward_ios, size: 16, color: whiteColor),
-          //     onTap: () async {
-          //       Get.to(() => SubscriptionsScreen());
-          //     },
-          //   ),
-          // ),
+          Padding(
+            padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
+            child: ListTile(
+              title: const Text("Subscriptions"),
+              titleTextStyle: TextStyle(color: whiteColor),
+              tileColor: whiteColor.withOpacity(0.05),
+              trailing:
+                  Icon(Icons.arrow_forward_ios, size: 16, color: whiteColor),
+              onTap: () async {
+                Get.to(() => SubscriptionsScreen());
+              },
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
             child: ListTile(
@@ -101,14 +102,16 @@ class _SettingsState extends State<Settings> {
               trailing:
                   Icon(Icons.arrow_forward_ios, size: 16, color: whiteColor),
               onTap: () async {
+                final prefs = await SharedPreferences.getInstance();
+                bool cleared = await prefs.clear();
+                if (cleared) {
+                  print('SharedPreferences cleared successfully');
+                } else {
+                  print('Failed to clear SharedPreferences');
+                }
                 if (FirebaseAuth.instance.currentUser != null) {
-                  // If the user is logged in, perform logout
-                  await FirebaseAuth.instance
-                      .signOut(); // Log out from Firebase
-                  // ScaffoldMessenger.of(context).showSnackBar(
-                  //     SnackBar(content: Text("Logout successfully")));
+                  await FirebaseAuth.instance.signOut();
                   setState(() {
-                    // Refresh UI to show "Login" after logout
                     Get.off(() => LogInScreen());
                   });
                 } else {

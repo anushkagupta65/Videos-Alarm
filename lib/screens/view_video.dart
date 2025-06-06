@@ -162,7 +162,7 @@ class ViewVideoController extends GetxController with WidgetsBindingObserver {
         _startAdScheduler();
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to load video');
+      // Get.snackbar('Error', 'Failed to load video');
     }
     update();
   }
@@ -431,7 +431,7 @@ class ViewVideo extends StatelessWidget {
   final String? description;
   final String? category;
   final String? videoId;
-  final Map<dynamic, String>? cast;
+  final String? starcast;
   final bool? myList;
 
   const ViewVideo({
@@ -445,7 +445,7 @@ class ViewVideo extends StatelessWidget {
     this.director,
     this.duration,
     this.cbfc,
-    this.cast,
+    this.starcast,
     this.myList,
   });
 
@@ -524,78 +524,6 @@ class ViewVideo extends StatelessWidget {
                                           child: CircularProgressIndicator(
                                               color: Colors.white),
                                         )),
-                              // if (!controller.isAdPlaying.value &&
-                              //     controller.chewieController.value != null)
-                              //   Positioned(
-                              //     top: 3,
-                              //     right: 38,
-                              //     child: IconButton(
-                              //       icon: const Icon(
-                              //         Icons.share,
-                              //         color: Colors.white,
-                              //         size: 18,
-                              //       ),
-                              //       onPressed: () async {
-                              //         try {
-                              //           final videoID = videoId ?? '';
-                              //           final videoDoc = await FirebaseFirestore
-                              //               .instance
-                              //               .collection('videos')
-                              //               .doc(videoID)
-                              //               .get();
-
-                              //           final thumbnailURL =
-                              //               videoDoc.data()?['thumbnailUrl']
-                              //                       as String? ??
-                              //                   '';
-
-                              //           final dynamicLinkService =
-                              //               DynamicLinkService();
-                              //           final deepLink =
-                              //               await dynamicLinkService
-                              //                   .createShareVideoLink(
-                              //             videoId: videoID,
-                              //             videoTitle:
-                              //                 videoTitle ?? 'Videos Alarm',
-                              //             videoDescription: description ??
-                              //                 'Check out this amazing video on Videos Alarm!',
-                              //             thumbnailUrl: thumbnailURL,
-                              //           );
-
-                              //           debugPrint(
-                              //               "VIEW VIDEO: Dynamic Link: $deepLink");
-
-                              //           if (deepLink.isNotEmpty) {
-                              //             Share.share(
-                              //               'Tap on the below link to watch a video\n\n'
-                              //               '$deepLink\n'
-                              //               '\n'
-                              //               'Sent by VideosAlarm.',
-                              //               subject: 'Check out this video!',
-                              //             );
-                              //           }
-                              //         } catch (e) {
-                              //           debugPrint(
-                              //               "Error creating/sharing dynamic link: $e");
-                              //           ScaffoldMessenger.of(context)
-                              //               .showSnackBar(
-                              //             SnackBar(
-                              //               content: Text(
-                              //                   'Failed to share video: $e'),
-                              //             ),
-                              //           );
-                              //         }
-                              //       },
-                              //       style: IconButton.styleFrom(
-                              //         backgroundColor:
-                              //             Colors.black.withOpacity(0.5),
-                              //         padding: const EdgeInsets.all(8),
-                              //         shape: RoundedRectangleBorder(
-                              //           borderRadius: BorderRadius.circular(8),
-                              //         ),
-                              //       ),
-                              //     ),
-                              //   ),
                             ],
                           ),
                         ),
@@ -651,7 +579,7 @@ class ViewVideo extends StatelessWidget {
                                   Text(
                                     releaseYear!,
                                     style: const TextStyle(
-                                      fontSize: 18,
+                                      fontSize: 14,
                                       color: Colors.white70,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -670,7 +598,7 @@ class ViewVideo extends StatelessWidget {
                                     child: Text(
                                       cbfc!,
                                       style: const TextStyle(
-                                        fontSize: 18,
+                                        fontSize: 14,
                                         color: Colors.white70,
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -682,7 +610,7 @@ class ViewVideo extends StatelessWidget {
                                   Text(
                                     duration!,
                                     style: const TextStyle(
-                                      fontSize: 18,
+                                      fontSize: 14,
                                       color: Colors.white70,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -701,6 +629,38 @@ class ViewVideo extends StatelessWidget {
                             ),
                           ),
                         ),
+                        const SizedBox(height: 16),
+                        if (starcast != null || director != null) ...[
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 6),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (starcast != null) ...[
+                                  Text(
+                                    "Cast: $starcast",
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.white70,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                                if (director != null) ...[
+                                  Text(
+                                    'Director: $director',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.white70,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
                         const SizedBox(height: 16),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -728,30 +688,35 @@ class ViewVideo extends StatelessWidget {
                             vertical: 12,
                           ),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              Column(
-                                children: [
-                                  IconButton(
-                                    onPressed: () {},
-                                    icon: Icon(
-                                      Icons.add,
-                                      color: Colors.white,
-                                      size: 38,
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: 12,
-                                  ),
-                                  Text(
-                                    "My List",
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                              // Column(
+                              //   children: [
+                              //     IconButton(
+                              //         onPressed: () {},
+                              //         icon: myList!
+                              //             ? Icon(
+                              //                 Icons.check,
+                              //                 color: Colors.white,
+                              //                 size: 38,
+                              //               )
+                              //             : Icon(
+                              //                 Icons.add,
+                              //                 color: Colors.white,
+                              //                 size: 38,
+                              //               )),
+                              //     SizedBox(
+                              //       height: 12,
+                              //     ),
+                              //     Text(
+                              //       "My List",
+                              //       style: const TextStyle(
+                              //         fontSize: 14,
+                              //         color: Colors.white,
+                              //       ),
+                              //     ),
+                              //   ],
+                              // ),
                               Column(
                                 children: [
                                   IconButton(
@@ -762,7 +727,10 @@ class ViewVideo extends StatelessWidget {
                                     ),
                                     onPressed: () async {
                                       try {
+                                        print('Starting video share process');
                                         final videoID = videoId ?? '';
+                                        print(
+                                            'Fetching video document for ID: $videoID');
                                         final videoDoc = await FirebaseFirestore
                                             .instance
                                             .collection('videos')
@@ -773,9 +741,17 @@ class ViewVideo extends StatelessWidget {
                                             videoDoc.data()?['thumbnailUrl']
                                                     as String? ??
                                                 '';
+                                        print(
+                                            'Retrieved thumbnail URL: $thumbnailURL');
 
                                         final dynamicLinkService =
                                             DynamicLinkService();
+                                        print(
+                                            'Creating dynamic link with parameters: '
+                                            'videoId=$videoID, '
+                                            'videoTitle=${videoTitle ?? 'Videos Alarm'}, '
+                                            'videoDescription=${description ?? 'Check out this amazing video on Videos Alarm!'}, '
+                                            'thumbnailUrl=$thumbnailURL');
                                         final deepLink =
                                             await dynamicLinkService
                                                 .createShareVideoLink(
@@ -787,10 +763,11 @@ class ViewVideo extends StatelessWidget {
                                           thumbnailUrl: thumbnailURL,
                                         );
 
-                                        debugPrint(
-                                            "VIEW VIDEO: Dynamic Link: $deepLink");
+                                        print(
+                                            "Dynamic Link created: $deepLink");
 
                                         if (deepLink.isNotEmpty) {
+                                          print('Sharing dynamic link');
                                           Share.share(
                                             'Tap on the below link to watch a video\n\n'
                                             '$deepLink\n'
@@ -798,9 +775,10 @@ class ViewVideo extends StatelessWidget {
                                             'Sent by VideosAlarm.',
                                             subject: 'Check out this video!',
                                           );
+                                          print('Share action completed');
                                         }
                                       } catch (e) {
-                                        debugPrint(
+                                        print(
                                             "Error creating/sharing dynamic link: $e");
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(
@@ -856,6 +834,7 @@ class ViewVideo extends StatelessWidget {
                                       Get.off(
                                         () => ViewVideo(
                                           releaseYear: video['releaseYear'],
+                                          starcast: video['starcast'],
                                           cbfc: video['cbfc'],
                                           myList: video['myList'],
                                           duration: video['duration'],
@@ -881,8 +860,7 @@ class ViewVideo extends StatelessWidget {
                   ),
                   if (!isSubscribed)
                     SubscriptionAlert(
-                      onActivate: () =>
-                          Get.to(() => const SubscriptionsScreen()),
+                      onActivate: () => Get.to(() => SubscriptionsScreen()),
                     ),
                 ],
               );

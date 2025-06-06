@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:intl/intl.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_popup/smart_popup.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -581,7 +582,7 @@ class SubscriptionController extends GetxController {
         'SubscriptionExpiryDate': Timestamp.fromDate(expiryDate),
         'PurchaseToken': response.paymentId!,
         'updatedAt': FieldValue.serverTimestamp(),
-        'createdAt': userData['createdAt'] ?? FieldValue.serverTimestamp(),
+        'releaseDate': userData['releaseDate'] ?? FieldValue.serverTimestamp(),
         'lastLogin': userData['lastLogin'] ?? FieldValue.serverTimestamp(),
         'name': userData['name'] ??
             FirebaseAuth.instance.currentUser?.displayName ??
@@ -927,7 +928,7 @@ class SubscriptionController extends GetxController {
         'SubscriptionExpiryDate': Timestamp.fromDate(expiryDate),
         'PurchaseToken': purchaseToken,
         'updatedAt': FieldValue.serverTimestamp(),
-        'createdAt': userData['createdAt'] ?? FieldValue.serverTimestamp(),
+        'releaseDate': userData['releaseDate'] ?? FieldValue.serverTimestamp(),
         'lastLogin': userData['lastLogin'] ?? FieldValue.serverTimestamp(),
         'name': userData['name'] ??
             FirebaseAuth.instance.currentUser?.displayName ??
@@ -1154,6 +1155,18 @@ class SubscriptionController extends GetxController {
   }
 
   Future<void> restorePurchases() async {
+    // Check if the user is a test user via SharedPreferences
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool isTestUser = prefs.getBool('isTestUser') ?? false;
+
+    // Skip restoration for test user
+    if (isTestUser) {
+      print(
+          "\n\n subscription controller ---- Test user detected, skipping purchase restoration");
+      isProcessing.value = false; // Reset processing state
+      return;
+    }
+
     try {
       print(
           "\n\n subscription controller ---- Attempting to restore purchases");
@@ -1654,7 +1667,7 @@ class SubscriptionController extends GetxController {
 //             'SubscriptionType': productId,
 //             'PurchaseToken': purchaseToken,
 //             'userId': userId,
-//             'createdAt': FieldValue.serverTimestamp(),
+//             'releaseDate': FieldValue.serverTimestamp(),
 //             'updatedAt': FieldValue.serverTimestamp(),
 //           });
 //           print(

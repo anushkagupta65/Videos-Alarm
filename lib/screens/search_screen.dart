@@ -45,6 +45,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
         var video = {
           "releaseYear": data['releaseYear'],
+          "starcast": data['starcast'],
           "cbfc": data['cbfc'],
           "myList": data['myList'],
           "duration": data['duration'],
@@ -243,12 +244,12 @@ class _SearchScreenState extends State<SearchScreen> {
                                                 );
                                               },
                                               child: Container(
-                                                width: 140,
-                                                height: 180,
+                                                width: 260,
+                                                height: 140,
                                                 decoration: BoxDecoration(
                                                   color: darkColor,
                                                   image: DecorationImage(
-                                                    fit: BoxFit.cover,
+                                                    fit: BoxFit.fill,
                                                     image: NetworkImage(
                                                         video['thumbnailUrl']),
                                                   ),
@@ -259,7 +260,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                             ),
                                             const SizedBox(height: 8),
                                             Container(
-                                              width: 140,
+                                              width: 200,
                                               height: 40,
                                               child: Text(
                                                 video['title'],
