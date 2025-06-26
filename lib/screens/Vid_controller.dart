@@ -71,7 +71,7 @@ class VideoController extends GetxController {
         var data = doc.data() as Map<String, dynamic>;
         String videoCategory = data['category'];
 
-        print('this is doc id${doc.id}');
+        print('Subscribed to notifications id${doc.id}');
         categorizedVideos.putIfAbsent(videoCategory, () => []);
         categorizedVideos[videoCategory]?.add({
           "releaseYear": data['releaseYear'],

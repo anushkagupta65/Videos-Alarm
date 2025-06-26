@@ -1,4 +1,7 @@
 {
   "java.configuration.updateBuildConfiguration": "interactive",
-  "cSpell.words": ["cbfc"]
+  "cSpell.words": [
+    "cbfc"
+  ],
+  "dart.flutterSdkPath": ".fvm/versions/3.27.4"
 }

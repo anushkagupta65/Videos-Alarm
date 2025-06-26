@@ -635,13 +635,13 @@ class SubscriptionController extends GetxController {
     print(
         "\n\n subscription controller ---- Razorpay payment error: ${response.message}");
     isProcessing.value = false;
-    Get.dialog(
-      SmartPopup(
-        title: "Payment Failed",
-        subTitle: response.message ?? "An error occurred during payment.",
-        popType: PopType.error,
-      ),
-    );
+    // Get.dialog(
+    //   SmartPopup(
+    //     title: "Payment Failed",
+    //     subTitle: response.message ?? "An error occurred during payment.",
+    //     popType: PopType.error,
+    //   ),
+    // );
   }
 
   int _parsePriceToPaise(String price) {
@@ -820,19 +820,6 @@ class SubscriptionController extends GetxController {
     isProcessing.value = false;
     String errorMessage = error?.message ?? "An unknown error occurred";
 
-    Get.dialog(
-      SmartPopup(
-        buttonAlignment: ButtonAlignment.horizontal,
-        title: "Purchase Failed",
-        subTitle: errorMessage,
-        primaryButtonText: "OK",
-        primaryButtonTap: () {
-          Get.back();
-        },
-        popType: PopType.error,
-        animationType: AnimationType.scale,
-      ),
-    );
   }
 
   Future<void> _handleSuccessfulPurchase(

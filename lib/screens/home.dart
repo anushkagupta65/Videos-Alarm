@@ -716,44 +716,42 @@ class Home extends StatelessWidget {
   }
 
   Widget _buildBannerSection() {
-    return Container(
-      height: 180.h,
-      width: double.infinity,
-      margin: EdgeInsets.only(bottom: 10.h),
-      child: Stack(
-        alignment: Alignment.bottomCenter,
-        children: [
-          PageView.builder(
+    return Column(
+      children: [
+        Container(
+          height: 180.h,
+          width: double.infinity,
+          margin: EdgeInsets.only(bottom: 10.h),
+          child: PageView.builder(
             controller: controller.bannerPageController,
             itemCount: controller.bannerImages.length,
             onPageChanged: (index) {
               controller.currentBannerIndex.value = index;
             },
             itemBuilder: (context, index) {
-              return _bannerCard(controller.bannerImages[index]['imageUrl']);
+              return _bannerCard(controller
+                      .bannerImages[controller.bannerImages.length - 1 - index]
+                  ['imageUrl']);
             },
           ),
-          Positioned(
-            bottom: 10.h,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: controller.bannerImages.asMap().entries.map((entry) {
-                return Container(
-                  width: 8.w,
-                  height: 8.h,
-                  margin: EdgeInsets.symmetric(vertical: 8.h, horizontal: 4.w),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: controller.currentBannerIndex.value == entry.key
-                        ? Colors.white
-                        : Colors.grey[600]!,
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-        ],
-      ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: controller.bannerImages.asMap().entries.map((entry) {
+            return Container(
+              width: 8.w,
+              height: 8.h,
+              margin: EdgeInsets.symmetric(vertical: 8.h, horizontal: 4.w),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: controller.currentBannerIndex.value == entry.key
+                    ? Colors.white
+                    : Colors.grey[600]!,
+              ),
+            );
+          }).toList(),
+        ),
+      ],
     );
   }
 
