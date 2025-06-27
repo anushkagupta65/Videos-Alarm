@@ -692,22 +692,25 @@ class Home extends StatelessWidget {
             : RefreshIndicator(
                 onRefresh: () => controller.onRefresh(),
                 child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildBannerSection(),
-                      _buildCategoryButtons(),
-                      Center(
-                        child: Obx(() => Text(
-                              controller.categoryTitle.value,
-                              style: TextStyle(
-                                  fontWeight: boldFont,
-                                  color: whiteColor,
-                                  fontSize: 20.sp),
-                            )),
-                      ),
-                      _buildVideoList(),
-                    ],
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildBannerSection(),
+                        _buildCategoryButtons(),
+                        Center(
+                          child: Obx(() => Text(
+                                controller.categoryTitle.value,
+                                style: TextStyle(
+                                    fontWeight: boldFont,
+                                    color: whiteColor,
+                                    fontSize: 20.sp),
+                              )),
+                        ),
+                        _buildVideoList(),
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -719,9 +722,9 @@ class Home extends StatelessWidget {
     return Column(
       children: [
         Container(
-          height: 180.h,
+          height: 150.h,
           width: double.infinity,
-          margin: EdgeInsets.only(bottom: 10.h),
+          margin: EdgeInsets.only(bottom: 8.h),
           child: PageView.builder(
             controller: controller.bannerPageController,
             itemCount: controller.bannerImages.length,
@@ -868,23 +871,22 @@ class Home extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.all(Radius.circular(10.r)),
               child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black.withOpacity(0.4),
-                      Colors.transparent,
-                    ],
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withOpacity(0.4),
+                        Colors.transparent,
+                      ],
+                    ),
+                    image: DecorationImage(
+                      image: NetworkImage(video['thumbnailUrl']),
+                      fit: BoxFit.fill,
+                    ),
                   ),
-                  image: DecorationImage(
-                    image: NetworkImage(video['thumbnailUrl']),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                width: double.infinity,
-                height: 160.h,
-              ),
+                  width: double.infinity,
+                  height: 150.h),
             ),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),

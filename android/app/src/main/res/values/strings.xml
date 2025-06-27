@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">VideosAlarm</string>
+    <string name="facebook_app_id">1210650363722594</string>
+    <string name="fb_login_protocol_scheme">fb1210650363722594</string>
+    <string name="facebook_client_token">80d1e0ccf74a0e36f7d5b442cb170471</string>
+</resources>
