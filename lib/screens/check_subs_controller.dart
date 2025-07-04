@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io'; // For platform checking
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:smart_popup/smart_popup.dart';
 import 'package:videos_alarm_app/screens/Vid_controller.dart';
@@ -53,12 +52,11 @@ class SubscriptionService {
       } else {
         await _checkAndroidSubscription(userDoc, userId);
       }
-    } catch (e) {
-
-    }
+    } catch (e) {}
   }
 
-  Future<void> _checkIOSSubscription(DocumentSnapshot userDoc, String userId) async {
+  Future<void> _checkIOSSubscription(
+      DocumentSnapshot userDoc, String userId) async {
     try {
       // Check if subscription expiry date exists in Firestore
       if (!userDoc.data().toString().contains('SubscriptionExpiryDate')) {
@@ -67,7 +65,8 @@ class SubscriptionService {
         return;
       }
 
-      DateTime expiryDate = (userDoc['SubscriptionExpiryDate'] as Timestamp).toDate();
+      DateTime expiryDate =
+          (userDoc['SubscriptionExpiryDate'] as Timestamp).toDate();
       bool isActive = userDoc['Active'] ?? false;
       print('iOS expiryDate: $expiryDate');
 
@@ -76,7 +75,10 @@ class SubscriptionService {
         print('iOS subscription is active until $expiryDate.');
       } else {
         videoController.isUserActive.value = false;
-        await FirebaseFirestore.instance.collection('users').doc(userId).update({
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId)
+            .update({
           'Active': false,
           'SubscriptionType': '',
           'PurchaseToken': '',
@@ -100,7 +102,8 @@ class SubscriptionService {
     }
   }
 
-  Future<void> _checkAndroidSubscription(DocumentSnapshot userDoc, String userId) async {
+  Future<void> _checkAndroidSubscription(
+      DocumentSnapshot userDoc, String userId) async {
     try {
       // Check if subscription expiry date exists in Firestore
       if (!userDoc.data().toString().contains('SubscriptionExpiryDate')) {
@@ -109,7 +112,8 @@ class SubscriptionService {
         return;
       }
 
-      DateTime expiryDate = (userDoc['SubscriptionExpiryDate'] as Timestamp).toDate();
+      DateTime expiryDate =
+          (userDoc['SubscriptionExpiryDate'] as Timestamp).toDate();
       bool isActive = userDoc['Active'] ?? false;
       print('Android expiryDate: $expiryDate');
 
@@ -120,7 +124,10 @@ class SubscriptionService {
       } else {
         // Subscription has expired or is marked inactive
         videoController.isUserActive.value = false;
-        await FirebaseFirestore.instance.collection('users').doc(userId).update({
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId)
+            .update({
           'Active': false,
           'SubscriptionType': '',
           'PurchaseToken': '',

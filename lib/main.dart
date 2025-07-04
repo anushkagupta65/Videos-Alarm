@@ -471,7 +471,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:videos_alarm_app/Controller/Sub_controller.dart';
 import 'package:videos_alarm_app/screens/Vid_controller.dart';
 import 'package:videos_alarm_app/screens/live_videos.dart';
-import 'package:videos_alarm_app/screens/view_video.dart';
 import 'package:videos_alarm_app/login_screen/splash_screen.dart';
 import 'package:videos_alarm_app/app_store/app_pref.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';

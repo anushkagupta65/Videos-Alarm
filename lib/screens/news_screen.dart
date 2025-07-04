@@ -4,7 +4,6 @@ import 'package:videos_alarm_app/api_services/models/news_list.dart';
 import 'package:videos_alarm_app/components/app_style.dart';
 import 'package:videos_alarm_app/components/blogdetailspage.dart';
 import '../components/check_internet.dart';
-import '../components/common_toast.dart';
 import '../components/loader.dart';
 import '../components/network_error_wiget.dart';
 import 'package:intl/intl.dart';
@@ -45,9 +44,11 @@ class _NewsScreenState extends State<NewsScreen> {
 
       // Sort articles based on selected filter
       if (selectedFilter == "Latest") {
-        articles.sort((a, b) => DateTime.parse(b.publishedAt!).compareTo(DateTime.parse(a.publishedAt!)));
+        articles.sort((a, b) => DateTime.parse(b.publishedAt!)
+            .compareTo(DateTime.parse(a.publishedAt!)));
       } else if (selectedFilter == "Oldest") {
-        articles.sort((a, b) => DateTime.parse(a.publishedAt!).compareTo(DateTime.parse(b.publishedAt!)));
+        articles.sort((a, b) => DateTime.parse(a.publishedAt!)
+            .compareTo(DateTime.parse(b.publishedAt!)));
       }
 
       setState(() {
@@ -93,7 +94,10 @@ class _NewsScreenState extends State<NewsScreen> {
       appBar: AppBar(
         backgroundColor: blackColor,
         foregroundColor: whiteColor,
-        title: Text('Top Headlines',style: TextStyle(color:whiteColor),),
+        title: Text(
+          'Top Headlines',
+          style: TextStyle(color: whiteColor),
+        ),
         actions: [
           PopupMenuButton<String>(
             onSelected: (value) {
@@ -120,7 +124,6 @@ class _NewsScreenState extends State<NewsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-           
                   ListView.separated(
                     itemCount: newsList.articles!.length,
                     shrinkWrap: true,
@@ -144,7 +147,8 @@ class _NewsScreenState extends State<NewsScreen> {
                         child: Card(
                           elevation: 5, // Add elevation for shadow
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15), // Increased border radius for modern feel
+                            borderRadius: BorderRadius.circular(
+                                15), // Increased border radius for modern feel
                           ),
                           child: Stack(
                             children: [
@@ -154,8 +158,10 @@ class _NewsScreenState extends State<NewsScreen> {
                                 child: Image.network(
                                   data.urlToImage.toString(),
                                   width: double.infinity,
-                                  height: 250, // Set a fixed height for the image
-                                  fit: BoxFit.cover, // Make the image cover the card
+                                  height:
+                                      250, // Set a fixed height for the image
+                                  fit: BoxFit
+                                      .cover, // Make the image cover the card
                                 ),
                               ),
                               // Overlay to make text readable
@@ -164,7 +170,8 @@ class _NewsScreenState extends State<NewsScreen> {
                                 height: 250, // Same height as image
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(15),
-                                  color: blackColor.withOpacity(0.6), // Semi-transparent overlay
+                                  color: blackColor.withOpacity(
+                                      0.6), // Semi-transparent overlay
                                 ),
                                 padding: EdgeInsets.all(10),
                                 child: Column(
@@ -172,14 +179,16 @@ class _NewsScreenState extends State<NewsScreen> {
                                   children: [
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             data.title.toString(),
                                             maxLines: 2,
                                             overflow: TextOverflow.ellipsis,
                                             style: TextStyle(
-                                              fontSize: 16, // Increased font size
+                                              fontSize:
+                                                  16, // Increased font size
                                               fontWeight: FontWeight.bold,
                                               color: whiteColor,
                                             ),
@@ -190,7 +199,8 @@ class _NewsScreenState extends State<NewsScreen> {
                                             maxLines: 3,
                                             overflow: TextOverflow.ellipsis,
                                             style: TextStyle(
-                                              fontSize: 14, // Adjusted font size
+                                              fontSize:
+                                                  14, // Adjusted font size
                                               color: grey300,
                                             ),
                                           ),
@@ -202,7 +212,8 @@ class _NewsScreenState extends State<NewsScreen> {
                                             ),
                                             style: TextStyle(
                                                 color: greyColor,
-                                                fontSize: 12), // Smaller date font
+                                                fontSize:
+                                                    12), // Smaller date font
                                           ),
                                         ],
                                       ),
@@ -218,7 +229,8 @@ class _NewsScreenState extends State<NewsScreen> {
                                             color: whiteColor,
                                             fontSize: 14,
                                             fontWeight: FontWeight.bold,
-                                            decoration: TextDecoration.underline, // Underline for clickability
+                                            decoration: TextDecoration
+                                                .underline, // Underline for clickability
                                           ),
                                         ),
                                       ),
