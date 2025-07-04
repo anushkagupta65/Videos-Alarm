@@ -3,8 +3,10 @@
 // import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
 // import 'package:intl/intl.dart';
+// import 'package:flutter_screenutil/flutter_screenutil.dart';
 // import 'package:videos_alarm_app/components/app_style.dart';
 // import 'package:videos_alarm_app/screens/view_video.dart';
+// import 'package:shimmer/shimmer.dart';
 
 // class HomeController extends GetxController {
 //   RxBool isLoading = false.obs;
@@ -12,9 +14,8 @@
 //       <String, List<Map<String, dynamic>>>{}.obs;
 //   RxList<Map<String, dynamic>> allVideos = <Map<String, dynamic>>[].obs;
 //   RxString selectedCategory = 'All'.obs;
-//   RxString categoryTitle = 'Latest Shows'.obs; // Default title
+//   RxString categoryTitle = 'Latest Shows'.obs;
 
-//   // Banner Configuration
 //   final PageController bannerPageController = PageController(initialPage: 0);
 //   RxInt currentBannerIndex = 0.obs;
 //   Timer? bannerTimer;
@@ -36,7 +37,7 @@
 //   }
 
 //   void startBannerTimer() {
-//     bannerTimer = Timer.periodic(const Duration(seconds: 3), (Timer timer) {
+//     bannerTimer = Timer.periodic(Duration(seconds: 3), (Timer timer) {
 //       if (bannerImages.isNotEmpty) {
 //         if (currentBannerIndex.value < bannerImages.length - 1) {
 //           currentBannerIndex.value++;
@@ -47,7 +48,7 @@
 //         if (bannerPageController.hasClients) {
 //           bannerPageController.animateToPage(
 //             currentBannerIndex.value,
-//             duration: const Duration(milliseconds: 500),
+//             duration: Duration(milliseconds: 500),
 //             curve: Curves.easeIn,
 //           );
 //         }
@@ -72,7 +73,7 @@
 //         bannersList.add(banner);
 //       }
 
-//       bannerImages.assignAll(bannersList); // Use assignAll for RxList
+//       bannerImages.assignAll(bannersList);
 //     } catch (error) {
 //       print("Error getting banners: $error");
 //     }
@@ -83,7 +84,7 @@
 
 //     try {
 //       FirebaseFirestore firestore = FirebaseFirestore.instance;
-//       QuerySnapshot querySnapshot = await firestore.collection('videos').get();
+//       QuerySnapshot querySnapshot = await firestore.collection('bunny').get();
 
 //       Map<String, List<Map<String, dynamic>>> categorizedVideos = {};
 //       List<Map<String, dynamic>> videosList = [];
@@ -101,6 +102,7 @@
 
 //         var video = {
 //           "releaseYear": data['releaseYear'],
+//           "starcast": data['starcast'],
 //           "cbfc": data['cbfc'],
 //           "myList": data['myList'],
 //           "duration": data['duration'],
@@ -124,9 +126,8 @@
 //         }
 //       }
 
-//       allVideos.assignAll(videosList); // Use assignAll for RxList
-//       categorizedVideosMap
-//           .assignAll(categorizedVideos); // Use assignAll for RxMap
+//       allVideos.assignAll(videosList);
+//       categorizedVideosMap.assignAll(categorizedVideos);
 //       isLoading.value = false;
 //     } catch (error) {
 //       isLoading.value = false;
@@ -178,8 +179,7 @@
 //         categoryTitle.value = 'Latest Songs';
 //         break;
 //       default:
-//         categoryTitle.value =
-//             'Latest ' + category; //For if other categories exist
+//         categoryTitle.value = 'Latest ' + category;
 //         break;
 //     }
 //   }
@@ -205,22 +205,25 @@
 //             : RefreshIndicator(
 //                 onRefresh: () => controller.onRefresh(),
 //                 child: SingleChildScrollView(
-//                   child: Column(
-//                     crossAxisAlignment: CrossAxisAlignment.start,
-//                     children: [
-//                       _buildBannerSection(),
-//                       _buildCategoryButtons(),
-//                       Center(
-//                         child: Obx(() => Text(
-//                               controller.categoryTitle.value,
-//                               style: TextStyle(
-//                                   fontWeight: boldFont,
-//                                   color: whiteColor,
-//                                   fontSize: 20),
-//                             )),
-//                       ),
-//                       _buildVideoList(),
-//                     ],
+//                   child: Padding(
+//                     padding: const EdgeInsets.symmetric(horizontal: 6),
+//                     child: Column(
+//                       crossAxisAlignment: CrossAxisAlignment.start,
+//                       children: [
+//                         _buildBannerSection(),
+//                         _buildCategoryButtons(),
+//                         Center(
+//                           child: Obx(() => Text(
+//                                 controller.categoryTitle.value,
+//                                 style: TextStyle(
+//                                     fontWeight: boldFont,
+//                                     color: whiteColor,
+//                                     fontSize: 20.sp),
+//                               )),
+//                         ),
+//                         _buildVideoList(),
+//                       ],
+//                     ),
 //                   ),
 //                 ),
 //               );
@@ -229,64 +232,61 @@
 //   }
 
 //   Widget _buildBannerSection() {
-//     return Container(
-//       height: 200,
-//       width: double.infinity,
-//       margin: const EdgeInsets.only(bottom: 10),
-//       child: Stack(
-//         alignment: Alignment.bottomCenter,
-//         children: [
-//           PageView.builder(
+//     return Column(
+//       children: [
+//         Container(
+//           height: 150.h,
+//           width: double.infinity,
+//           margin: EdgeInsets.only(bottom: 8.h),
+//           child: PageView.builder(
 //             controller: controller.bannerPageController,
 //             itemCount: controller.bannerImages.length,
 //             onPageChanged: (index) {
 //               controller.currentBannerIndex.value = index;
 //             },
 //             itemBuilder: (context, index) {
-//               return _bannerCard(controller.bannerImages[index]['imageUrl']);
+//               return _bannerCard(controller
+//                       .bannerImages[controller.bannerImages.length - 1 - index]
+//                   ['imageUrl']);
 //             },
 //           ),
-//           Positioned(
-//             bottom: 10,
-//             child: Row(
-//               mainAxisAlignment: MainAxisAlignment.center,
-//               children: controller.bannerImages.asMap().entries.map((entry) {
-//                 return Container(
-//                   width: 8.0,
-//                   height: 8.0,
-//                   margin: const EdgeInsets.symmetric(
-//                       vertical: 8.0, horizontal: 4.0),
-//                   decoration: BoxDecoration(
-//                     shape: BoxShape.circle,
-//                     color: controller.currentBannerIndex.value == entry.key
-//                         ? Colors.white
-//                         : Colors.grey[600]!,
-//                   ),
-//                 );
-//               }).toList(),
-//             ),
-//           ),
-//         ],
-//       ),
+//         ),
+//         Row(
+//           mainAxisAlignment: MainAxisAlignment.center,
+//           children: controller.bannerImages.asMap().entries.map((entry) {
+//             return Container(
+//               width: 8.w,
+//               height: 8.h,
+//               margin: EdgeInsets.symmetric(vertical: 8.h, horizontal: 4.w),
+//               decoration: BoxDecoration(
+//                 shape: BoxShape.circle,
+//                 color: controller.currentBannerIndex.value == entry.key
+//                     ? Colors.white
+//                     : Colors.grey[600]!,
+//               ),
+//             );
+//           }).toList(),
+//         ),
+//       ],
 //     );
 //   }
 
 //   Widget _bannerCard(String imageUrl) {
 //     return Container(
-//       margin: const EdgeInsets.symmetric(horizontal: 10.0),
+//       margin: EdgeInsets.symmetric(horizontal: 10.w),
 //       decoration: BoxDecoration(
-//         borderRadius: BorderRadius.circular(15.0),
+//         borderRadius: BorderRadius.circular(15.r),
 //         boxShadow: [
 //           BoxShadow(
 //             color: Colors.black.withOpacity(0.2),
-//             spreadRadius: 1,
-//             blurRadius: 5,
-//             offset: const Offset(0, 3),
+//             spreadRadius: 1.w,
+//             blurRadius: 5.w,
+//             offset: Offset(0, 3.h),
 //           ),
 //         ],
 //       ),
 //       child: ClipRRect(
-//         borderRadius: BorderRadius.circular(15.0),
+//         borderRadius: BorderRadius.circular(15.r),
 //         child: Image.network(
 //           imageUrl,
 //           fit: BoxFit.fill,
@@ -298,17 +298,23 @@
 
 //   Widget _buildCategoryButtons() {
 //     return Container(
-//       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+//       padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 12.w),
 //       child: SingleChildScrollView(
 //         scrollDirection: Axis.horizontal,
 //         child: Row(
 //           children: [
-//             _categoryButton('All', Icons.all_inclusive_rounded),
+//             _categoryButton('All', "assets/images/video-player.png"),
 //             ...controller.categorizedVideosMap.keys
 //                 .toList()
 //                 .where((category) => category != 'live')
 //                 .map((category) {
-//               return _categoryButton(category, Icons.movie_filter_rounded);
+//               return _categoryButton(
+//                   category,
+//                   category == "Movie"
+//                       ? "assets/images/film.png"
+//                       : category == "Songs"
+//                           ? "assets/images/play-button.png"
+//                           : "assets/images/film.png");
 //             }).toList(),
 //           ],
 //         ),
@@ -323,17 +329,17 @@
 //     return videos.isEmpty
 //         ? Center(
 //             child: Padding(
-//               padding: const EdgeInsets.symmetric(vertical: 40),
+//               padding: EdgeInsets.symmetric(vertical: 40.h),
 //               child: Text(
 //                 'No videos in this category.',
-//                 style: TextStyle(color: Colors.white70, fontSize: 16),
+//                 style: TextStyle(color: Colors.white70, fontSize: 16.sp),
 //               ),
 //             ),
 //           )
 //         : ListView.builder(
 //             shrinkWrap: true,
-//             physics: const NeverScrollableScrollPhysics(),
-//             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+//             physics: NeverScrollableScrollPhysics(),
+//             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
 //             itemCount: videos.length,
 //             itemBuilder: (context, index) {
 //               var video = videos[index];
@@ -344,16 +350,20 @@
 
 //   Widget _buildShimmerLoading() {
 //     return ListView.builder(
-//       padding: const EdgeInsets.all(16),
+//       padding: EdgeInsets.all(16.w),
 //       itemCount: 5,
 //       itemBuilder: (context, index) {
-//         return Container(
-//           margin: const EdgeInsets.only(bottom: 20),
-//           decoration: BoxDecoration(
-//             color: Colors.grey[800]!.withOpacity(0.5),
-//             borderRadius: BorderRadius.circular(20),
+//         return Shimmer.fromColors(
+//           baseColor: Colors.grey[800]!.withOpacity(0.5),
+//           highlightColor: Colors.grey[500]!.withOpacity(0.3),
+//           child: Container(
+//             margin: EdgeInsets.only(bottom: 20.h),
+//             decoration: BoxDecoration(
+//               color: Colors.grey[800],
+//               borderRadius: BorderRadius.circular(20.r),
+//             ),
+//             height: 200.h,
 //           ),
-//           height: 200,
 //         );
 //       },
 //     );
@@ -361,11 +371,12 @@
 
 //   Widget _buildVideoCard(Map<String, dynamic> video) {
 //     return Padding(
-//       padding: const EdgeInsets.only(bottom: 16),
+//       padding: EdgeInsets.only(bottom: 16.h),
 //       child: GestureDetector(
 //         onTap: () {
 //           Get.to(() => ViewVideo(
 //                 releaseYear: video['releaseYear'],
+//                 starcast: video['starcast'],
 //                 cbfc: video['cbfc'],
 //                 myList: video['myList'],
 //                 duration: video['duration'],
@@ -377,97 +388,100 @@
 //                 videoId: video['videoId'],
 //               ));
 //         },
-//         child: Container(
-//           decoration: BoxDecoration(
-//             color: const Color.fromARGB(255, 15, 36, 75),
-//             borderRadius: BorderRadius.circular(20),
-//             boxShadow: [
-//               BoxShadow(
-//                 color: const Color.fromARGB(255, 3, 16, 39),
-//                 spreadRadius: 1,
-//                 blurRadius: 8,
-//                 offset: const Offset(0, 4),
-//               ),
-//             ],
-//           ),
-//           child: Column(
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: [
-//               ClipRRect(
-//                 borderRadius: BorderRadius.circular(10),
-//                 child: Stack(
-//                   children: [
-//                     Image.network(
-//                       video['thumbnailUrl'],
-//                       width: double.infinity,
-//                       height: 230,
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             ClipRRect(
+//               borderRadius: BorderRadius.all(Radius.circular(10.r)),
+//               child: Container(
+//                   decoration: BoxDecoration(
+//                     gradient: LinearGradient(
+//                       begin: Alignment.topCenter,
+//                       end: Alignment.bottomCenter,
+//                       colors: [
+//                         Colors.black.withOpacity(0.4),
+//                         Colors.transparent,
+//                       ],
+//                     ),
+//                     image: DecorationImage(
+//                       image: NetworkImage(video['thumbnailUrl']),
 //                       fit: BoxFit.fill,
 //                     ),
-//                     Positioned(
-//                         bottom: 8,
-//                         left: 8,
-//                         child: Text(
-//                           'Released: ${controller.formatDate(video['releaseDate'])}',
-//                           style: const TextStyle(
-//                               color: Colors.white70,
-//                               fontSize: 13,
-//                               shadows: [
-//                                 Shadow(
-//                                   blurRadius: 2.0,
-//                                   color: Colors.black,
-//                                   offset: Offset(1.0, 1.0),
-//                                 )
-//                               ]),
-//                         )),
-//                     Container(
-//                       decoration: BoxDecoration(
-//                         gradient: LinearGradient(
-//                           begin: Alignment.topCenter,
-//                           end: Alignment.bottomCenter,
-//                           colors: [
-//                             Colors.black.withOpacity(0.4),
-//                             Colors.transparent
-//                           ],
+//                   ),
+//                   width: double.infinity,
+//                   height: 150.h),
+//             ),
+//             Padding(
+//               padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
+//               child: Column(
+//                 mainAxisAlignment: MainAxisAlignment.start,
+//                 crossAxisAlignment: CrossAxisAlignment.start,
+//                 children: [
+//                   Text(
+//                     "${video['title']}",
+//                     style: TextStyle(
+//                       color: whiteColor,
+//                       fontSize: 15,
+//                       fontWeight: FontWeight.bold,
+//                       shadows: [
+//                         Shadow(
+//                           blurRadius: 1,
+//                           color: Colors.black,
+//                           offset: Offset(1, 1),
 //                         ),
-//                       ),
+//                       ],
 //                     ),
-//                   ],
-//                 ),
+//                   ),
+//                   Text(
+//                     'Released: ${controller.formatDate(video['releaseDate'])}',
+//                     style: TextStyle(
+//                       color: Colors.white,
+//                       fontSize: 11,
+//                       shadows: [
+//                         Shadow(
+//                           blurRadius: 1,
+//                           color: Colors.black,
+//                           offset: Offset(1, 1),
+//                         ),
+//                       ],
+//                     ),
+//                   ),
+//                 ],
 //               ),
-//             ],
-//           ),
+//             ),
+//           ],
 //         ),
 //       ),
 //     );
 //   }
 
-//   Widget _categoryButton(String category, IconData icon) {
+//   Widget _categoryButton(String category, String image) {
 //     return GestureDetector(
 //       onTap: () {
 //         controller.selectCategory(category);
 //       },
 //       child: Obx(() => Padding(
-//             padding: const EdgeInsets.symmetric(horizontal: 6.0),
+//             padding: EdgeInsets.symmetric(horizontal: 6.w),
 //             child: Container(
-//               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
+//               padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 14.w),
 //               decoration: BoxDecoration(
 //                 color: controller.selectedCategory.value == category
 //                     ? Colors.deepPurpleAccent
 //                     : Colors.transparent,
-//                 borderRadius: BorderRadius.circular(30),
+//                 borderRadius: BorderRadius.circular(30.r),
 //                 border: Border.all(
 //                   color: Colors.deepPurpleAccent.withOpacity(0.6),
-//                   width: 1.3,
+//                   width: 1.3.w,
 //                 ),
 //               ),
 //               child: Row(
 //                 children: [
-//                   Icon(icon,
+//                   Image.asset(image,
 //                       color: controller.selectedCategory.value == category
 //                           ? whiteColor
 //                           : greyColor,
-//                       size: 19),
-//                   const SizedBox(width: 7),
+//                       height: 12.h),
+//                   SizedBox(width: 7.w),
 //                   Text(
 //                     category,
 //                     style: TextStyle(
@@ -475,7 +489,7 @@
 //                           ? whiteColor
 //                           : greyColor,
 //                       fontWeight: FontWeight.w500,
-//                       fontSize: 15,
+//                       fontSize: 15.sp,
 //                     ),
 //                   ),
 //                 ],
@@ -494,6 +508,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:videos_alarm_app/components/app_style.dart';
 import 'package:videos_alarm_app/screens/view_video.dart';
+import 'package:shimmer/shimmer.dart';
 
 class HomeController extends GetxController {
   RxBool isLoading = false.obs;
@@ -511,9 +526,10 @@ class HomeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    getVideosList();
-    getBanners();
-    startBannerTimer();
+    getVideosList().then((_) {
+      getBanners();
+      startBannerTimer();
+    });
   }
 
   @override
@@ -555,6 +571,7 @@ class HomeController extends GetxController {
 
         var banner = {
           "imageUrl": data["imageUrl"],
+          "videoId": data.containsKey("videoId") ? data["videoId"] : null,
         };
 
         bannersList.add(banner);
@@ -571,7 +588,7 @@ class HomeController extends GetxController {
 
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
-      QuerySnapshot querySnapshot = await firestore.collection('videos').get();
+      QuerySnapshot querySnapshot = await firestore.collection('bunny').get();
 
       Map<String, List<Map<String, dynamic>>> categorizedVideos = {};
       List<Map<String, dynamic>> videosList = [];
@@ -675,6 +692,19 @@ class HomeController extends GetxController {
     selectedCategory.value = category;
     updateCategoryTitle(category);
   }
+
+  // Helper to get video by videoId for banner navigation
+  Map<String, dynamic>? getVideoById(String? videoId) {
+    if (videoId == null) return null;
+    try {
+      return allVideos.firstWhere(
+        (v) => v['videoId'] == videoId,
+        orElse: () => {},
+      );
+    } catch (_) {
+      return null;
+    }
+  }
 }
 
 class Home extends StatelessWidget {
@@ -697,7 +727,7 @@ class Home extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildBannerSection(),
+                        _buildBannerSection(context),
                         _buildCategoryButtons(),
                         Center(
                           child: Obx(() => Text(
@@ -718,66 +748,136 @@ class Home extends StatelessWidget {
     );
   }
 
-  Widget _buildBannerSection() {
+  Widget _buildBannerSection(BuildContext context) {
     return Column(
       children: [
         Container(
           height: 150.h,
           width: double.infinity,
           margin: EdgeInsets.only(bottom: 8.h),
-          child: PageView.builder(
-            controller: controller.bannerPageController,
-            itemCount: controller.bannerImages.length,
-            onPageChanged: (index) {
-              controller.currentBannerIndex.value = index;
-            },
-            itemBuilder: (context, index) {
-              return _bannerCard(controller
-                      .bannerImages[controller.bannerImages.length - 1 - index]
-                  ['imageUrl']);
-            },
+          child: Obx(
+            () => PageView.builder(
+              controller: controller.bannerPageController,
+              itemCount: controller.bannerImages.length,
+              onPageChanged: (index) {
+                controller.currentBannerIndex.value = index;
+              },
+              itemBuilder: (ctx, index) {
+                var banner = controller
+                    .bannerImages[controller.bannerImages.length - 1 - index];
+                return _bannerCard(ctx, banner);
+              },
+            ),
           ),
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: controller.bannerImages.asMap().entries.map((entry) {
-            return Container(
-              width: 8.w,
-              height: 8.h,
-              margin: EdgeInsets.symmetric(vertical: 8.h, horizontal: 4.w),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: controller.currentBannerIndex.value == entry.key
-                    ? Colors.white
-                    : Colors.grey[600]!,
-              ),
-            );
-          }).toList(),
+        Obx(
+          () => Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: controller.bannerImages.asMap().entries.map((entry) {
+              return Container(
+                width: 8.w,
+                height: 8.h,
+                margin: EdgeInsets.symmetric(vertical: 8.h, horizontal: 4.w),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: controller.currentBannerIndex.value == entry.key
+                      ? Colors.white
+                      : Colors.grey[600]!,
+                ),
+              );
+            }).toList(),
+          ),
         ),
       ],
     );
   }
 
-  Widget _bannerCard(String imageUrl) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 10.w),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            spreadRadius: 1.w,
-            blurRadius: 5.w,
-            offset: Offset(0, 3.h),
+  // Only this method is changed per your latest instruction
+  Widget _bannerCard(BuildContext context, Map<String, dynamic> banner) {
+    final imageUrl = banner['imageUrl'];
+    final videoId = banner['videoId'];
+    final video = controller.getVideoById(videoId);
+
+    return GestureDetector(
+      onTap: () async {
+        print('Banner tapped. imageUrl: $imageUrl, videoId: $videoId');
+        if (video != null &&
+            video.isNotEmpty &&
+            video["videoUrl"] != null &&
+            video["videoUrl"].toString().isNotEmpty) {
+          print(
+              'Showing preview dialog for video: ${video['title']} (${video['videoId']})');
+          String? thumbnailUrl = video['thumbnailUrl'];
+          bool? result = await showDialog<bool>(
+            context: context,
+            barrierDismissible: true,
+            builder: (context) => VideoPreviewDialog(
+              title: video['title'],
+              description: video['description'],
+              thumbnailUrl: thumbnailUrl,
+              duration: video['duration'],
+              releaseYear: video['releaseYear'],
+              cbfc: video['cbfc'],
+              starcast: video['starcast'],
+            ),
+          );
+
+          if (result == true) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (_) => ViewVideo(
+                  releaseYear: video['releaseYear'],
+                  starcast: video['starcast'],
+                  cbfc: video['cbfc'],
+                  myList: video['myList'],
+                  duration: video['duration'],
+                  director: video['director'],
+                  videoLink: video['videoUrl'],
+                  videoTitle: video['title'],
+                  description: video['description'],
+                  category: video['category'],
+                  videoId: video['videoId'],
+                ),
+              ),
+            );
+          }
+        } else {
+          print('No related video found. Showing "Streaming Soon" dialog.');
+          await showDialog(
+            context: context,
+            barrierDismissible: true,
+            builder: (context) => VideoPreviewDialog(
+              title: "Streaming Soon",
+              description: "This video will be available soon. Stay tuned!",
+              thumbnailUrl: imageUrl,
+              duration: "",
+              releaseYear: "",
+              cbfc: "",
+              starcast: "",
+            ),
+          );
+        }
+      },
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 10.w),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              spreadRadius: 1.w,
+              blurRadius: 5.w,
+              offset: Offset(0, 3.h),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(15.r),
+          child: Image.network(
+            imageUrl,
+            fit: BoxFit.fill,
+            width: double.infinity,
           ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(15.r),
-        child: Image.network(
-          imageUrl,
-          fit: BoxFit.fill,
-          width: double.infinity,
         ),
       ),
     );
@@ -790,12 +890,18 @@ class Home extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            _categoryButton('All', Icons.all_inclusive_rounded),
+            _categoryButton('All', "assets/images/video-player.png"),
             ...controller.categorizedVideosMap.keys
                 .toList()
                 .where((category) => category != 'live')
                 .map((category) {
-              return _categoryButton(category, Icons.movie_filter_rounded);
+              return _categoryButton(
+                  category,
+                  category == "Movie"
+                      ? "assets/images/film.png"
+                      : category == "Songs"
+                          ? "assets/images/play-button.png"
+                          : "assets/images/film.png");
             }).toList(),
           ],
         ),
@@ -834,13 +940,17 @@ class Home extends StatelessWidget {
       padding: EdgeInsets.all(16.w),
       itemCount: 5,
       itemBuilder: (context, index) {
-        return Container(
-          margin: EdgeInsets.only(bottom: 20.h),
-          decoration: BoxDecoration(
-            color: Colors.grey[800]!.withOpacity(0.5),
-            borderRadius: BorderRadius.circular(20.r),
+        return Shimmer.fromColors(
+          baseColor: Colors.grey[800]!.withOpacity(0.5),
+          highlightColor: Colors.grey[500]!.withOpacity(0.3),
+          child: Container(
+            margin: EdgeInsets.only(bottom: 20.h),
+            decoration: BoxDecoration(
+              color: Colors.grey[800],
+              borderRadius: BorderRadius.circular(20.r),
+            ),
+            height: 200.h,
           ),
-          height: 200.h,
         );
       },
     );
@@ -932,7 +1042,7 @@ class Home extends StatelessWidget {
     );
   }
 
-  Widget _categoryButton(String category, IconData icon) {
+  Widget _categoryButton(String category, String image) {
     return GestureDetector(
       onTap: () {
         controller.selectCategory(category);
@@ -953,11 +1063,11 @@ class Home extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(icon,
+                  Image.asset(image,
                       color: controller.selectedCategory.value == category
                           ? whiteColor
                           : greyColor,
-                      size: 19.sp),
+                      height: 12.h),
                   SizedBox(width: 7.w),
                   Text(
                     category,

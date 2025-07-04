@@ -21,6 +21,7 @@ class _SearchScreenState extends State<SearchScreen> {
   void initState() {
     super.initState();
     _getVideosList();
+    print("init function from search screen");
   }
 
   Future<void> _getVideosList() async {
@@ -31,7 +32,7 @@ class _SearchScreenState extends State<SearchScreen> {
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-      QuerySnapshot querySnapshot = await firestore.collection('videos').get();
+      QuerySnapshot querySnapshot = await firestore.collection('bunny').get();
 
       Map<String, List<Map<String, dynamic>>> categorizedVideos = {};
 
@@ -120,9 +121,26 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: blackColor,
+      appBar: AppBar(
+        backgroundColor: blackColor,
+        elevation: 3,
+        centerTitle: true,
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: whiteColor),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Text(
+          "VideosAlarm",
+          style: TextStyle(
+            color: whiteColor,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
       body: Column(
         children: [
-          // Search bar in the body
           Padding(
             padding: const EdgeInsets.all(15.0),
             child: Container(

@@ -1,24 +1,23 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:videos_alarm_app/components/common_toast.dart';
 import 'package:videos_alarm_app/login_screen/login_screen.dart';
-import 'package:videos_alarm_app/screens/banner_video_list.dart';
 import 'package:videos_alarm_app/screens/subscriptions.dart';
+import 'package:videos_alarm_app/screens/support_screen.dart';
 import '../components/app_style.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Settings extends StatefulWidget {
-  const Settings({super.key});
+class SettingsPage extends StatefulWidget {
+  const SettingsPage({super.key});
 
   @override
-  State<Settings> createState() => _SettingsState();
+  State<SettingsPage> createState() => _SettingsState();
 }
 
-class _SettingsState extends State<Settings> {
+class _SettingsState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -92,11 +91,20 @@ class _SettingsState extends State<Settings> {
           Padding(
             padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
             child: ListTile(
-              title: Text(FirebaseAuth.instance.currentUser != null
-                  ? 'Logout'
-                  : 'Login'),
-              // title: Text(
-              //     AppPref.getUniqueToken() !=""? "Logout":"Login"),
+              title: const Text("Support"),
+              titleTextStyle: TextStyle(color: whiteColor),
+              tileColor: whiteColor.withOpacity(0.05),
+              trailing:
+                  Icon(Icons.arrow_forward_ios, size: 16, color: whiteColor),
+              onTap: () async {
+                Get.to(() => SupportPage());
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
+            child: ListTile(
+              title: Text('Logout'),
               titleTextStyle: TextStyle(color: whiteColor),
               tileColor: whiteColor.withOpacity(0.05),
               trailing:

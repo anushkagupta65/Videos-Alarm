@@ -62,7 +62,7 @@ class VideoController extends GetxController {
   Future<void> fetchSameCategoryVideos(String category) async {
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
-      QuerySnapshot querySnapshot = await firestore.collection('videos').get();
+      QuerySnapshot querySnapshot = await firestore.collection('bunny').get();
 
       Map<String, List<Map<String, dynamic>>> categorizedVideos = {};
 

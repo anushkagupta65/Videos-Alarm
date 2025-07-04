@@ -119,7 +119,7 @@ class ViewVideoController extends GetxController with WidgetsBindingObserver {
   Future<void> _fetchVideoAds() async {
     try {
       final adsSnapshot = await FirebaseFirestore.instance
-          .collection('videos')
+          .collection('bunny')
           .doc(videoId)
           .collection('ads')
           .get();
@@ -328,7 +328,7 @@ class ViewVideoController extends GetxController with WidgetsBindingObserver {
 
     try {
       final videoDocRef =
-          FirebaseFirestore.instance.collection('videos').doc(videoId);
+          FirebaseFirestore.instance.collection('bunny').doc(videoId);
       await videoDocRef.update({'views': FieldValue.increment(1)});
       viewCountUpdated.value = true;
     } catch (e) {
@@ -541,7 +541,7 @@ class ViewVideo extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(horizontal: 16.0),
                           child: StreamBuilder<DocumentSnapshot>(
                             stream: FirebaseFirestore.instance
-                                .collection('videos')
+                                .collection('bunny')
                                 .doc(videoId)
                                 .snapshots(),
                             builder: (context, snapshot) {
