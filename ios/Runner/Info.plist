@@ -22,6 +22,8 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+
+	<!-- ✅ Firebase configuration -->
 	<key>FirebaseAppDelegateProxyEnabled</key>
 	<true/>
 	<key>FirebaseDeepLinkPasteboardRetrievalEnabled</key>
@@ -34,15 +36,23 @@
 	<false/>
 	<key>FirebaseAnalyticsCollectionEnabled</key>
 	<true/>
+
+	<!-- ✅ Background modes for notifications -->
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
 		<string>remote-notification</string>
 	</array>
+
+	<!-- ✅ APN Environment -->
 	<key>aps-environment</key>
 	<string>production</string>
+
+
 	<!-- <key>NSUserTrackingUsageDescription</key>
-	<string>This identifier will be used to deliver personalized ads to you.</string> -->
+<string>This identifier will be used to deliver personalized ads to you.</string> -->
+
+
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -51,11 +61,20 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>videosalarm</string>
-			</array>
+		 </array>
 		</dict>
 		<dict>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>fb1210650363722594</string>
+			</array>
+		</dict>
+	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>fb1210650363722594</string>
@@ -73,10 +92,13 @@
 		<string>fbauth2</string>
 		<string>fbshareextension</string>
 	</array>
+
+	<!-- ✅ Associated domains -->
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>applinks:videosalarmsapp.page.link</string>
 	</array>
+
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
@@ -86,6 +108,8 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+
+	<!-- Optional: SKAdNetwork support -->
 	<key>SKAdNetworkItems</key>
 	<array>
 		<dict>
@@ -93,6 +117,7 @@
 			<string>su67r6k2v3.skadnetwork</string>
 		</dict>
 	</array>
+
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

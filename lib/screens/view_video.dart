@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'dart:ui';
 import 'package:videos_alarm_app/screens/Vid_controller.dart';
@@ -11,6 +12,7 @@ import 'package:videos_alarm_app/screens/subscriptions.dart';
 import 'package:videos_alarm_app/screens/video_thumb.dart';
 import 'package:video_player/video_player.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:videos_alarm_app/screens/watch_later_button.dart';
 import 'package:videos_alarm_app/services/dynamic_link_services.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -138,6 +140,22 @@ class ViewVideoController extends GetxController with WidgetsBindingObserver {
       print('Error fetching ads: $e');
       _initializeVideoPlayer(videoLink!);
     }
+  }
+
+  Future<void> addToWatchlist(String userId, String videoId) async {
+    final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
+
+    await userRef.update({
+      'watchlist': FieldValue.arrayUnion([videoId])
+    });
+  }
+
+  Future<void> removeFromWatchlist(String userId, String videoId) async {
+    final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
+
+    await userRef.update({
+      'watchlist': FieldValue.arrayRemove([videoId])
+    });
   }
 
   Future<void> _initializeVideoPlayer(String videoUrl) async {
@@ -542,6 +560,7 @@ class ViewVideo extends StatelessWidget {
                           child: Stack(
                             children: [
                               // Show Bunny Stream Better Player
+
                               if (videoLink != null && videoLink!.isNotEmpty)
                                 Builder(
                                   builder: (context) {
@@ -666,18 +685,17 @@ class ViewVideo extends StatelessWidget {
                                   Text(
                                     "Cast: $starcast",
                                     style: const TextStyle(
-                                      fontSize: 13,
+                                      fontSize: 12,
                                       color: Colors.white70,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                 ],
-                                SizedBox(height: 8),
                                 if (director != null) ...[
                                   Text(
                                     'Director: $director',
                                     style: const TextStyle(
-                                      fontSize: 13,
+                                      fontSize: 12,
                                       color: Colors.white70,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -692,22 +710,53 @@ class ViewVideo extends StatelessWidget {
                         // Views Counter
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: StreamBuilder<DocumentSnapshot>(
-                            stream: FirebaseFirestore.instance
-                                .collection('bunny')
-                                .doc(videoId)
-                                .snapshots(),
-                            builder: (context, snapshot) {
-                              if (!snapshot.hasData) {
-                                return const Text('Views: Loading...',
-                                    style: TextStyle(color: Colors.white));
-                              }
-                              final views = snapshot.data!['views'] ?? 0;
-                              return Text('Views: $views',
-                                  style:
-                                      const TextStyle(color: Colors.white70));
-                            },
-                          ),
+                          child: videoId == null
+                              ? const Text(
+                                  'Views: N/A',
+                                  style: TextStyle(color: Colors.white),
+                                )
+                              : StreamBuilder<DocumentSnapshot>(
+                                  stream: FirebaseFirestore.instance
+                                      .collection('bunny')
+                                      .doc(videoId)
+                                      .snapshots(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return const Text(
+                                        'Views: Loading...',
+                                        style: TextStyle(color: Colors.white),
+                                      );
+                                    }
+
+                                    if (snapshot.hasError) {
+                                      return const Text(
+                                        'Views: Error',
+                                        style: TextStyle(color: Colors.white),
+                                      );
+                                    }
+
+                                    final doc = snapshot.data;
+
+                                    if (doc == null || !doc.exists) {
+                                      return const Text(
+                                        'Views: N/A',
+                                        style: TextStyle(color: Colors.white),
+                                      );
+                                    }
+
+                                    // Extract views safely as integer
+                                    final views = (doc.data()
+                                            as Map<String, dynamic>)['views'] ??
+                                        0;
+
+                                    return Text(
+                                      'Views: $views',
+                                      style: const TextStyle(
+                                          color: Colors.white70),
+                                    );
+                                  },
+                                ),
                         ),
                         const SizedBox(height: 20),
 
@@ -718,8 +767,10 @@ class ViewVideo extends StatelessWidget {
                             vertical: 12,
                           ),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
+                              WatchLaterButton(videoId: videoId!),
+                              const SizedBox(width: 12),
                               Column(
                                 children: [
                                   IconButton(
@@ -759,11 +810,6 @@ class ViewVideo extends StatelessWidget {
                                             await dynamicLinkService
                                                 .createShareVideoLink(
                                           videoId: videoID,
-                                          // videoTitle:
-                                          //     videoTitle ?? 'Videos Alarm',
-                                          // videoDescription: description ??
-                                          //     'Check out this amazing video on Videos Alarm!',
-                                          // thumbnailUrl: thumbnailURL,
                                         );
 
                                         print(
@@ -902,7 +948,6 @@ class ViewVideo extends StatelessWidget {
   }
 }
 
-// Keep your existing BunnyStreamBetterPlayer class exactly as it is
 class BunnyStreamBetterPlayer extends StatefulWidget {
   final String pullZone;
   final String videoId;
@@ -919,61 +964,110 @@ class BunnyStreamBetterPlayer extends StatefulWidget {
 }
 
 class _BunnyStreamBetterPlayerState extends State<BunnyStreamBetterPlayer> {
-  late BetterPlayerController _betterPlayerController;
+  BetterPlayerController? _betterPlayerController;
+  SharedPreferences? _prefs;
+  bool _hasResumed = false;
+  bool _isDisposed = false;
+
+  String get _videoKey => "video_position_${widget.videoId}";
 
   @override
   void initState() {
     super.initState();
+    _initAsync();
+  }
 
-    final videoUrl =
-        "https://${widget.pullZone}.b-cdn.net/${widget.videoId}/playlist.m3u8";
+  Future<void> _initAsync() async {
+    try {
+      _prefs = await SharedPreferences.getInstance();
 
-    final betterPlayerDataSource = BetterPlayerDataSource(
-      BetterPlayerDataSourceType.network,
-      videoUrl,
-      asmsTrackNames: ["Low", "Medium", "High"], // optional labels for tracks
-    );
+      final videoUrl =
+          "https://${widget.pullZone}.b-cdn.net/${widget.videoId}/playlist.m3u8";
 
-    _betterPlayerController = BetterPlayerController(
-      BetterPlayerConfiguration(
-        autoPlay: true,
-        allowedScreenSleep: false,
-        aspectRatio: 16 / 9,
-        fullScreenAspectRatio: 3 / 2,
-        autoDetectFullscreenAspectRatio: true,
-        handleLifecycle: true,
-        controlsConfiguration: const BetterPlayerControlsConfiguration(
-          enableQualities: true,
-          enablePlaybackSpeed: true,
-          enableMute: true,
-          enableFullscreen: true,
-          enableProgressBarDrag: true,
+      final betterPlayerDataSource = BetterPlayerDataSource(
+        BetterPlayerDataSourceType.network,
+        videoUrl,
+        asmsTrackNames: ["Low", "Medium", "High"],
+      );
+
+      final controller = BetterPlayerController(
+        BetterPlayerConfiguration(
+          autoPlay: true,
+          allowedScreenSleep: false,
+          aspectRatio: 16 / 9,
+          fullScreenAspectRatio: 3 / 2,
+          autoDetectFullscreenAspectRatio: true,
+          handleLifecycle: true,
+          controlsConfiguration: const BetterPlayerControlsConfiguration(
+            enableQualities: true,
+            enablePlaybackSpeed: true,
+            enableMute: true,
+            enableFullscreen: true,
+            enableProgressBarDrag: true,
+          ),
+          eventListener: (event) async {
+            if (event.betterPlayerEventType == BetterPlayerEventType.play) {
+              WakelockPlus.enable();
+
+              if (!_hasResumed) {
+                _hasResumed = true;
+                final lastPosition = _prefs?.getInt(_videoKey) ?? 0;
+                if (lastPosition > 0) {
+                  _betterPlayerController!
+                      .seekTo(Duration(seconds: lastPosition));
+                }
+              }
+            }
+
+            if (event.betterPlayerEventType == BetterPlayerEventType.pause ||
+                event.betterPlayerEventType == BetterPlayerEventType.finished) {
+              WakelockPlus.disable();
+              await _saveCurrentPosition("eventListener");
+            }
+          },
         ),
-        eventListener: (event) {
-          if (event.betterPlayerEventType == BetterPlayerEventType.play) {
-            WakelockPlus.enable();
-          } else if (event.betterPlayerEventType ==
-                  BetterPlayerEventType.pause ||
-              event.betterPlayerEventType == BetterPlayerEventType.finished) {
-            WakelockPlus.disable();
-          }
-        },
-      ),
-      betterPlayerDataSource: betterPlayerDataSource,
-    );
+        betterPlayerDataSource: betterPlayerDataSource,
+      );
+
+      if (!_isDisposed) {
+        setState(() {
+          _betterPlayerController = controller;
+        });
+      }
+    } catch (e, st) {
+      print(
+          "[BunnyStreamBetterPlayer] Error initializing BetterPlayer: $e\n$st");
+    }
+  }
+
+  Future<void> _saveCurrentPosition([String from = "unknown"]) async {
+    if (_betterPlayerController == null || _prefs == null) {
+      return;
+    }
+    final position =
+        await _betterPlayerController!.videoPlayerController?.position;
+    if (position != null) {
+      int saveSeconds = position.inSeconds - 15;
+      if (saveSeconds < 0) saveSeconds = 0;
+      await _prefs!.setInt(_videoKey, saveSeconds);
+    }
   }
 
   @override
   void dispose() {
-    _betterPlayerController.dispose();
+    _isDisposed = true;
+    _saveCurrentPosition("dispose").then((_) {
+      _betterPlayerController?.dispose();
+    });
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BetterPlayer(
-      controller: _betterPlayerController,
-    );
+    if (_betterPlayerController == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    return BetterPlayer(controller: _betterPlayerController!);
   }
 }
 
@@ -1002,7 +1096,6 @@ class VideoPreviewDialog extends StatelessWidget {
     return Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.all(24),
-      elevation: 0,
       child: Container(
         decoration: BoxDecoration(
           color: Colors.grey[900]?.withOpacity(0.95),
@@ -1025,7 +1118,6 @@ class VideoPreviewDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Thumbnail with gradient shading overlay
             Stack(
               children: [
                 ClipRRect(
@@ -1035,7 +1127,7 @@ class VideoPreviewDialog extends StatelessWidget {
                           thumbnailUrl!,
                           width: double.infinity,
                           height: 170,
-                          fit: BoxFit.cover,
+                          fit: BoxFit.fill,
                           errorBuilder: (ctx, err, stack) => Container(
                             color: Colors.grey[800],
                             height: 170,
@@ -1055,7 +1147,6 @@ class VideoPreviewDialog extends StatelessWidget {
                           ),
                         ),
                 ),
-                // Gradient overlay
                 Positioned.fill(
                   child: Container(
                     decoration: BoxDecoration(
@@ -1076,7 +1167,6 @@ class VideoPreviewDialog extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 18),
-            // Title and info row
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1118,7 +1208,6 @@ class VideoPreviewDialog extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            // Description
             AnimatedOpacity(
               opacity: 1,
               duration: const Duration(milliseconds: 350),
@@ -1207,7 +1296,7 @@ class VideoPreviewDialog extends StatelessWidget {
                   ),
                 ),
               ],
-            )
+            ),
           ],
         ),
       ),

@@ -2,8 +2,8 @@ name: videos_alarm_app
 description: A new Flutter project.
 publish_to: "none"
 
-# version: 2.1.0+43 #Version for Android (Uncomment this while uploading to Play Store)
-version: 2.3.6+9 #Version for iOS  (Uncomment this while uploading to App Store)
+# version: 2.1.1+44 #Version for Android (Uncomment this while uploading to Play Store)
+version: 2.3.7+10 #Version for iOS  (Uncomment this while uploading to App Store)
 
 environment:
   sdk: ">=3.0.6 <4.0.0"
@@ -57,6 +57,7 @@ dependencies:
   app_links: ^6.4.0
   shimmer: ^3.0.0
   image_picker: ^1.0.0
+  upgrader: ^11.4.0
 
 dependency_overrides:
   smart_popup: ^3.0.4

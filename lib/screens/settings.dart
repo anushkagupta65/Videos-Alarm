@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,6 +8,7 @@ import 'package:videos_alarm_app/components/common_toast.dart';
 import 'package:videos_alarm_app/login_screen/login_screen.dart';
 import 'package:videos_alarm_app/screens/subscriptions.dart';
 import 'package:videos_alarm_app/screens/support_screen.dart';
+import 'package:videos_alarm_app/screens/watch_later.dart';
 import '../components/app_style.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -78,6 +80,49 @@ class _SettingsState extends State<SettingsPage> {
           Padding(
             padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
             child: ListTile(
+              title: const Text("My List"),
+              titleTextStyle: TextStyle(color: whiteColor),
+              tileColor: whiteColor.withOpacity(0.05),
+              trailing:
+                  Icon(Icons.arrow_forward_ios, size: 16, color: whiteColor),
+              onTap: () async {
+                final userId = FirebaseAuth.instance.currentUser?.uid;
+
+                if (userId == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Please log in to view your watchlist.')),
+                  );
+                  return;
+                }
+
+                try {
+                  final userDoc = await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(userId)
+                      .get();
+
+                  final watchlist =
+                      List<String>.from(userDoc.data()?['watchlist'] ?? []);
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => WatchLaterPage(watchlist),
+                    ),
+                  );
+                } catch (e) {
+                  debugPrint('❌ Error loading watchlist: $e');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Failed to load watchlist: $e')),
+                  );
+                }
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
+            child: ListTile(
               title: const Text("Subscriptions"),
               titleTextStyle: TextStyle(color: whiteColor),
               tileColor: whiteColor.withOpacity(0.05),
@@ -109,23 +154,50 @@ class _SettingsState extends State<SettingsPage> {
               tileColor: whiteColor.withOpacity(0.05),
               trailing:
                   Icon(Icons.arrow_forward_ios, size: 16, color: whiteColor),
-              onTap: () async {
-                final prefs = await SharedPreferences.getInstance();
-                bool cleared = await prefs.clear();
-                if (cleared) {
-                  print('SharedPreferences cleared successfully');
-                } else {
-                  print('Failed to clear SharedPreferences');
-                }
-                if (FirebaseAuth.instance.currentUser != null) {
-                  await FirebaseAuth.instance.signOut();
-                  setState(() {
-                    Get.off(() => LogInScreen());
-                  });
-                } else {
-                  Navigator.pushReplacement(context,
-                      MaterialPageRoute(builder: (context) => LogInScreen()));
-                }
+              onTap: () {
+                showCupertinoDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return CupertinoAlertDialog(
+                      title: Text('Logout'),
+                      content: Text('Are you sure you want to logout?'),
+                      actions: [
+                        CupertinoDialogAction(
+                          child: Text('Cancel'),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        CupertinoDialogAction(
+                          isDestructiveAction: true,
+                          child: Text('Logout'),
+                          onPressed: () async {
+                            Navigator.of(context).pop(); // Close dialog
+                            final prefs = await SharedPreferences.getInstance();
+                            bool cleared = await prefs.clear();
+                            if (cleared) {
+                              print('SharedPreferences cleared successfully');
+                            } else {
+                              print('Failed to clear SharedPreferences');
+                            }
+                            if (FirebaseAuth.instance.currentUser != null) {
+                              await FirebaseAuth.instance.signOut();
+                              setState(() {
+                                Get.off(() => LogInScreen());
+                              });
+                            } else {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => LogInScreen()),
+                              );
+                            }
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
               },
             ),
           ),
@@ -147,42 +219,38 @@ class _SettingsState extends State<SettingsPage> {
   }
 
   Future<void> _showDeleteConfirmationDialog(BuildContext context) async {
-    return showDialog<void>(
+    return showCupertinoDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: blackColor,
-          title: const Text(
-            'Delete Account',
-            style: TextStyle(color: Colors.red),
+        return CupertinoAlertDialog(
+          title: Text('Delete Account'),
+          content: Column(
+            children: [
+              Text(
+                'Are you sure you want to delete your account?',
+                // style: TextStyle(color: blackColor),
+              ),
+              SizedBox(height: 6), // Spacing between texts
+              Text(
+                'This action cannot be undone.',
+                // style: TextStyle(color: blackColor),
+              ),
+            ],
           ),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text(
-                  'Are you sure you want to delete your account?',
-                  style: TextStyle(color: whiteColor),
-                ),
-                Text(
-                  'This action cannot be undone.',
-                  style: TextStyle(color: whiteColor),
-                ),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
+          actions: [
+            CupertinoDialogAction(
               child: Text(
                 'Cancel',
-                style: TextStyle(color: whiteColor),
+                // style: TextStyle(color: blackColor),
               ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
-            TextButton(
-              child: const Text(
+            CupertinoDialogAction(
+              isDestructiveAction: true,
+              child: Text(
                 'Delete',
                 style: TextStyle(color: Colors.red),
               ),
