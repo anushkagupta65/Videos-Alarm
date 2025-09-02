@@ -1,3 +1,5 @@
+// ignore_for_file: unused_element
+
 import 'dart:convert';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -32,11 +34,11 @@ class SubscriptionController extends GetxController {
 
   static const String androidBasicPlanId = 'vip_plan_id';
   static const String iosPremiumPlanId = 'com.videosalarm.subscription.premium';
+  static const String iosBundleId = 'videos.alarm.app';
 
   @override
   void onInit() async {
     super.onInit();
-    // Load .env file
     await dotenv.load(fileName: ".env");
 
     inAppPurchase = InAppPurchase.instance;
@@ -44,17 +46,6 @@ class SubscriptionController extends GetxController {
       _razorpay = Razorpay();
       _razorpay?.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handleRazorpaySuccess);
       _razorpay?.on(Razorpay.EVENT_PAYMENT_ERROR, _handleRazorpayError);
-    }
-
-    await _initializeBillingClient();
-    await _checkAvailability();
-    await loadProductDetails();
-    await checkSubscriptionStatus();
-
-    if (!nowactive.value) {
-      print(
-          "\n\n subscription controller ---- No active subscription, attempting to restore purchases");
-      await restorePurchases();
     }
 
     final Stream<List<PurchaseDetails>> purchaseUpdated =
@@ -73,6 +64,17 @@ class SubscriptionController extends GetxController {
         isProcessing.value = false;
       },
     );
+
+    await _initializeBillingClient();
+    await _checkAvailability();
+    await loadProductDetails();
+    await checkSubscriptionStatus();
+
+    if (!nowactive.value) {
+      print(
+          "\n\n subscription controller ---- No active subscription, attempting to restore purchases");
+      await restorePurchases();
+    }
   }
 
   Future<void> _initializeBillingClient() async {
@@ -133,6 +135,7 @@ class SubscriptionController extends GetxController {
   }
 
   Future<void> checkSubscriptionStatus() async {
+    print("===============this was called===============");
     final userId = FirebaseAuth.instance.currentUser?.uid;
     if (userId == null) {
       nowactive.value = false;
@@ -141,6 +144,7 @@ class SubscriptionController extends GetxController {
     }
 
     try {
+      print("===============this was called===============inside try block");
       final doc = await FirebaseFirestore.instance
           .collection('users')
           .doc(userId)
@@ -352,7 +356,7 @@ class SubscriptionController extends GetxController {
 
   Future<void> _startRazorpayPayment() async {
     if (!Platform.isAndroid) {
-      return; // Prevent Razorpay execution on non-Android platforms
+      return;
     }
 
     String productId = androidBasicPlanId;
@@ -381,7 +385,6 @@ class SubscriptionController extends GetxController {
           "\n\n subscription controller ----   Calculated amount in paise for Razorpay: $amountInPaise");
       isProcessing.value = true;
 
-      // Call the method to create a Razorpay order
       await _createRazorpayOrder(amountInPaise, productId);
     } catch (e) {
       print(
@@ -411,10 +414,10 @@ class SubscriptionController extends GetxController {
     }
 
     Map<String, dynamic> body = {
-      "amount": amountInPaise, // Amount is already in paise
+      "amount": amountInPaise,
       "currency": "INR",
       "receipt": "receipt#$productId",
-      "payment_capture": 1, // Ensures automatic capture
+      "payment_capture": 1,
     };
 
     var response = await http.post(
@@ -431,7 +434,6 @@ class SubscriptionController extends GetxController {
       final responseData = jsonDecode(response.body);
       print(
           "\n\n subscription controller ---- Razorpay Order Creation Response: $responseData");
-      // Extract the order_id from the response
       String orderId = responseData['id'];
 
       _openCheckout(orderId, amountInPaise, productId);
@@ -521,13 +523,8 @@ class SubscriptionController extends GetxController {
       print(
           "\n\n subscription controller ---- Starting In-App Purchase for product: $productId");
       isProcessing.value = true;
-      if (Platform.isIOS) {
-        await inAppPurchase.buyConsumable(
-            purchaseParam: PurchaseParam(productDetails: productDetails));
-      } else {
-        await inAppPurchase.buyNonConsumable(
-            purchaseParam: PurchaseParam(productDetails: productDetails));
-      }
+      await inAppPurchase.buyNonConsumable(
+          purchaseParam: PurchaseParam(productDetails: productDetails));
     } catch (e) {
       print(
           "\n\n subscription controller ---- Error initiating in-app purchase: $e");
@@ -535,7 +532,7 @@ class SubscriptionController extends GetxController {
       Get.dialog(
         SmartPopup(
           title: "Purchase Error",
-          subTitle: "Failed to initiate purchase. Please try again.",
+          subTitle: "Failed to initiate purchase. Please try again. $e",
           primaryButtonText: "OK",
           primaryButtonTap: () => Get.back(),
           popType: PopType.error,
@@ -577,10 +574,13 @@ class SubscriptionController extends GetxController {
 
       await FirebaseFirestore.instance.collection('users').doc(userId).set({
         'Active': true,
+        'PurchaseToken': response.paymentId,
+        'AutoRenewing': true,
+        'OrderId': response.orderId ?? '',
+        'paymentMethod': 'razorpay',
         'SubscriptionType': productId,
         'SubscriptionStartDate': Timestamp.fromDate(purchaseDate),
         'SubscriptionExpiryDate': Timestamp.fromDate(expiryDate),
-        'PurchaseToken': response.paymentId!,
         'updatedAt': FieldValue.serverTimestamp(),
         'releaseDate': userData['releaseDate'] ?? FieldValue.serverTimestamp(),
         'lastLogin': userData['lastLogin'] ?? FieldValue.serverTimestamp(),
@@ -619,15 +619,6 @@ class SubscriptionController extends GetxController {
       print(
           "\n\n subscription controller ---- Stack trace: ${StackTrace.current}");
       isProcessing.value = false;
-      Get.dialog(
-        SmartPopup(
-          title: "Error",
-          subTitle: "$e",
-          primaryButtonText: "OK",
-          primaryButtonTap: () => Get.back(),
-          popType: PopType.error,
-        ),
-      );
     }
   }
 
@@ -635,13 +626,6 @@ class SubscriptionController extends GetxController {
     print(
         "\n\n subscription controller ---- Razorpay payment error: ${response.message}");
     isProcessing.value = false;
-    // Get.dialog(
-    //   SmartPopup(
-    //     title: "Payment Failed",
-    //     subTitle: response.message ?? "An error occurred during payment.",
-    //     popType: PopType.error,
-    //   ),
-    // );
   }
 
   int _parsePriceToPaise(String price) {
@@ -660,32 +644,150 @@ class SubscriptionController extends GetxController {
     return priceInPaise;
   }
 
-  Future<bool> verifyIOSPurchase(PurchaseDetails purchaseDetails) async {
+  Future<void> _logPurchaseVerification({
+    required String userId,
+    required String productId,
+    required String action,
+    Map<String, dynamic>? verificationResult,
+    String? errorMessage,
+    String status = 'success',
+  }) async {
     try {
-      final String receiptData =
-          purchaseDetails.verificationData.serverVerificationData;
-      if (receiptData.isEmpty) {
-        print("\n\n subscription controller ---- Empty receipt data");
-        return false;
-      }
+      final logData = {
+        'userId': userId,
+        'productId': productId,
+        'action': action,
+        'status': status,
+        'verificationResult': verificationResult,
+        'errorMessage': errorMessage,
+        'timestamp': FieldValue.serverTimestamp(),
+        'environment': Platform.isIOS ? 'ios' : 'android',
+      };
 
-      bool isValid = await _validateReceipt(receiptData, isSandbox: false);
+      await FirebaseFirestore.instance.collection('purchase_logs').add(logData);
 
-      if (!isValid) {
-        print(
-            "\n\n subscription controller ---- Production validation failed. Attempting sandbox validation.");
-        isValid = await _validateReceipt(receiptData, isSandbox: true);
-      }
-
-      return isValid;
+      print(
+          "\n\n subscription controller ---- Logged purchase verification: $logData");
     } catch (e) {
       print(
-          "\n\n subscription controller ---- Error verifying iOS purchase: $e");
-      return false;
+          "\n\n subscription controller ---- Error logging purchase verification: $e");
     }
   }
 
-  Future<bool> _validateReceipt(String receiptData,
+  Future<Map<String, dynamic>?> verifyIOSPurchase(
+      PurchaseDetails purchaseDetails) async {
+    final String jws = purchaseDetails.verificationData.serverVerificationData;
+    final String userId = FirebaseAuth.instance.currentUser?.uid ?? 'unknown';
+    final String productId = purchaseDetails.productID;
+
+    if (jws.isEmpty) {
+      print(
+          "\n\n subscription controller ---- Error: JWS is empty. Cannot verify purchase.");
+      await _logPurchaseVerification(
+        userId: userId,
+        productId: productId,
+        action: 'verify_purchase',
+        status: 'error',
+        errorMessage: 'Empty JWS',
+      );
+      return null;
+    }
+
+    try {
+      final parts = jws.split('.');
+      if (parts.length != 3) {
+        final errorMsg = 'Invalid JWS format.';
+        await _logPurchaseVerification(
+          userId: userId,
+          productId: productId,
+          action: 'verify_purchase',
+          status: 'error',
+          errorMessage: errorMsg,
+        );
+        throw Exception(errorMsg);
+      }
+      final String payloadPart = parts[1];
+      final String decodedPayload =
+          utf8.decode(base64Url.decode(base64Url.normalize(payloadPart)));
+      final Map<String, dynamic> payloadMap = json.decode(decodedPayload);
+
+      if (payloadMap['bundleId'] != iosBundleId) {
+        final errorMsg =
+            'Verification failed: Bundle ID mismatch. Expected $iosBundleId but got ${payloadMap['bundleId']}';
+        await _logPurchaseVerification(
+          userId: userId,
+          productId: productId,
+          action: 'verify_purchase',
+          status: 'error',
+          errorMessage: errorMsg,
+        );
+        throw Exception(errorMsg);
+      }
+      if (payloadMap['productId'] != purchaseDetails.productID) {
+        final errorMsg =
+            'Verification failed: Product ID mismatch. Expected ${purchaseDetails.productID} but got ${payloadMap['productId']}';
+        await _logPurchaseVerification(
+          userId: userId,
+          productId: productId,
+          action: 'verify_purchase',
+          status: 'error',
+          errorMessage: errorMsg,
+        );
+        throw Exception(errorMsg);
+      }
+      DateTime expiryDate =
+          DateTime.fromMillisecondsSinceEpoch(payloadMap['expiresDate'] ?? 0);
+      if (!expiryDate.isAfter(DateTime.now())) {
+        print(
+            "\n\n subscription controller ---- Subscription is not active (expired)");
+        await _logPurchaseVerification(
+          userId: userId,
+          productId: productId,
+          action: 'verify_purchase',
+          status: 'error',
+          errorMessage: 'Subscription expired',
+          verificationResult: payloadMap,
+        );
+        return null;
+      }
+
+      bool isAutoRenewing = payloadMap['autoRenewStatus'] == '1' ||
+          payloadMap['is_in_billing_retry_period'] == '1' ||
+          payloadMap['type'] == 'Auto-Renewable Subscription';
+      print(
+          "\n\n subscription controller ---- Auto-renewing status: $isAutoRenewing");
+      print(
+          "\n\n subscription controller ---- ✅ iOS JWS Verification Successful!");
+
+      final result = {
+        ...payloadMap,
+        'isAutoRenewing': isAutoRenewing,
+      };
+
+      await _logPurchaseVerification(
+        userId: userId,
+        productId: productId,
+        action: 'verify_purchase',
+        verificationResult: result,
+        status: 'success',
+      );
+
+      return result;
+    } catch (e) {
+      print(
+          "\n\n subscription controller ---- ❌ Error verifying iOS JWS purchase: $e");
+      await _logPurchaseVerification(
+        userId: userId,
+        productId: productId,
+        action: 'verify_purchase',
+        status: 'error',
+        errorMessage: e.toString(),
+      );
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> _validateReceipt(String receiptData,
       {required bool isSandbox}) async {
     final String url = isSandbox
         ? "https://sandbox.itunes.apple.com/verifyReceipt"
@@ -709,13 +811,14 @@ class SubscriptionController extends GetxController {
             "\n\n subscription controller ---- HTTP error: ${response.statusCode}");
         print(
             "\n\n subscription controller ---- Response body: ${response.body}");
-        return false;
+        return null;
       }
 
       final Map<String, dynamic> result = json.decode(response.body);
 
       if (result['status'] == 0) {
         List<dynamic> inAppPurchases = result['latest_receipt_info'] ?? [];
+        bool hasActive = false;
         for (var purchase in inAppPurchases) {
           if (purchase['product_id'] == iosPremiumPlanId) {
             int expiresDateMs = int.parse(purchase['expires_date_ms'] ?? '0');
@@ -724,26 +827,31 @@ class SubscriptionController extends GetxController {
             if (expiryDate.isAfter(DateTime.now())) {
               print(
                   "Found active subscription in ${isSandbox ? 'sandbox' : 'production'}: $purchase");
-              return true;
+              hasActive = true;
+              break;
             }
           }
         }
-        print(
-            "No active subscription found in ${isSandbox ? 'sandbox' : 'production'}");
-        return false;
+        if (hasActive) {
+          return result;
+        } else {
+          print(
+              "No active subscription found in ${isSandbox ? 'sandbox' : 'production'}");
+          return null;
+        }
       } else if (result['status'] == 21007 && !isSandbox) {
         print(
             "Sandbox receipt used in production environment. Needs validation against sandbox.");
-        return false;
+        return null;
       } else {
         print(
             "iOS purchase verification failed against ${isSandbox ? 'sandbox' : 'production'}: ${result['status']}");
-        return false;
+        return null;
       }
     } catch (e) {
       print(
           "Error validating receipt against ${isSandbox ? 'sandbox' : 'production'}: $e");
-      return false;
+      return null;
     }
   }
 
@@ -752,22 +860,35 @@ class SubscriptionController extends GetxController {
     for (final PurchaseDetails purchaseDetails in purchaseDetailsList) {
       try {
         print(
-            "Purchase update: ${purchaseDetails.status} for ${purchaseDetails.productID}");
+            "\n\n subscription controller ---- Purchase update: ${purchaseDetails.status} for ${purchaseDetails.productID} (PurchaseID: ${purchaseDetails.purchaseID})");
 
         if (purchaseDetails.status == PurchaseStatus.pending) {
           print("\n\n subscription controller ---- Purchase is pending");
           _showPendingUI();
+        } else if (purchaseDetails.status == PurchaseStatus.purchased) {
+          print(
+              "\n\n subscription controller ---- Handling new purchase for ${purchaseDetails.productID}");
+          await _handleSuccessfulPurchase(purchaseDetails);
+        } else if (purchaseDetails.status == PurchaseStatus.restored) {
+          print(
+              "\n\n subscription controller ---- Handling restored purchase for ${purchaseDetails.productID}");
+          await _handleSuccessfulPurchase(purchaseDetails);
         } else if (purchaseDetails.status == PurchaseStatus.error) {
           print(
-              "\n\n subscription controller ---- Purchase error: ${purchaseDetails.error?.message}");
+              "\n\n subscription controller ---- Purchase error: ${purchaseDetails.error?.message} (Code: ${purchaseDetails.error?.code})");
           if (purchaseDetails.error?.code == 'itemAlreadyOwned') {
             print(
-                "\n\n subscription controller ---- Item already owned, treating as a restore");
+                "\n\n subscription controller ---- Item already owned, verifying purchase");
             if (Platform.isIOS) {
-              bool isValid = await verifyIOSPurchase(purchaseDetails);
-              if (isValid) {
+              var result = await verifyIOSPurchase(purchaseDetails);
+              if (result != null) {
+                print(
+                    "\n\n subscription controller ---- Verification successful, treating as purchased");
+                purchaseDetails.status = PurchaseStatus.purchased;
                 await _handleSuccessfulPurchase(purchaseDetails);
               } else {
+                print(
+                    "\n\n subscription controller ---- Verification failed for already owned item");
                 _handleError(IAPError(
                   source: 'storekit',
                   code: 'invalid_receipt',
@@ -780,11 +901,6 @@ class SubscriptionController extends GetxController {
           } else {
             _handleError(purchaseDetails.error);
           }
-        } else if (purchaseDetails.status == PurchaseStatus.purchased ||
-            purchaseDetails.status == PurchaseStatus.restored) {
-          print(
-              "\n\n subscription controller ---- Purchase successful or restored");
-          await _handleSuccessfulPurchase(purchaseDetails);
         } else if (purchaseDetails.status == PurchaseStatus.canceled) {
           print("\n\n subscription controller ---- Purchase canceled");
           isProcessing.value = false;
@@ -792,7 +908,14 @@ class SubscriptionController extends GetxController {
 
         if (purchaseDetails.pendingCompletePurchase) {
           print("\n\n subscription controller ---- Completing purchase");
-          await inAppPurchase.completePurchase(purchaseDetails);
+          try {
+            await inAppPurchase.completePurchase(purchaseDetails);
+            print(
+                "\n\n subscription controller ---- Purchase completed successfully");
+          } catch (e) {
+            print(
+                "\n\n subscription controller ---- Error completing purchase: $e");
+          }
         }
       } catch (e) {
         print(
@@ -803,23 +926,23 @@ class SubscriptionController extends GetxController {
   }
 
   void _showPendingUI() {
-    Get.dialog(
-      SmartPopup(
-        title: "Processing",
-        subTitle: "Your payment is being processed. Please wait...",
-        primaryButtonText: "",
-        popType: PopType.info,
-      ),
-      barrierDismissible: false,
-    );
+    if (!(Get.isDialogOpen ?? false)) {
+      Get.dialog(
+        SmartPopup(
+          title: "Processing",
+          subTitle: "Your payment is being processed. Please wait...",
+          primaryButtonText: "",
+          popType: PopType.info,
+        ),
+        barrierDismissible: false,
+      );
+    }
   }
 
   void _handleError(IAPError? error) {
     print(
         "\n\n subscription controller ---- Handling purchase error: ${error?.message}");
     isProcessing.value = false;
-    String errorMessage = error?.message ?? "An unknown error occurred";
-
   }
 
   Future<void> _handleSuccessfulPurchase(
@@ -832,30 +955,39 @@ class SubscriptionController extends GetxController {
     DateTime expiryDate =
         _getSubscriptionExpiryDate(purchaseDetails.productID, purchaseDate);
 
+    String paymentMethod = Platform.isIOS ? 'ios' : 'android';
+    String purchaseToken =
+        purchaseDetails.verificationData.serverVerificationData;
+    bool autoRenewing = true;
+    String orderId = purchaseDetails.purchaseID ?? '';
+
+    Map<String, dynamic>? paymentData;
+
     if (Platform.isIOS) {
       try {
-        isValid = await verifyIOSPurchase(purchaseDetails);
-        if (isValid && purchaseDetails.status == PurchaseStatus.restored) {
-          final String receiptData =
-              purchaseDetails.verificationData.serverVerificationData;
-          final receiptInfo = await _getReceiptInfo(receiptData);
-          if (receiptInfo != null) {
-            purchaseDate = receiptInfo['purchaseDate'];
-            expiryDate = receiptInfo['expiryDate'];
-          } else {
-            isValid = false;
-          }
-        } else if (isValid) {
-          if (purchaseDetails.transactionDate != null) {
-            int timestamp = int.parse(purchaseDetails.transactionDate!);
-            purchaseDate = DateTime.fromMillisecondsSinceEpoch(timestamp);
-          }
-          expiryDate = _getSubscriptionExpiryDate(
-              purchaseDetails.productID, purchaseDate);
+        final verificationResult = await verifyIOSPurchase(purchaseDetails);
+        isValid = verificationResult != null;
+        if (isValid) {
+          purchaseDate = DateTime.fromMillisecondsSinceEpoch(
+              verificationResult['purchaseDate'] ??
+                  DateTime.now().millisecondsSinceEpoch);
+          expiryDate = DateTime.fromMillisecondsSinceEpoch(
+              verificationResult['expiresDate'] ??
+                  _getSubscriptionExpiryDate(
+                          purchaseDetails.productID, purchaseDate)
+                      .millisecondsSinceEpoch);
+          orderId = verificationResult['transactionId'] ??
+              purchaseDetails.purchaseID ??
+              '';
+          autoRenewing = verificationResult['isAutoRenewing'] ?? true;
+          paymentData = verificationResult;
+        } else {
+          paymentData = {'rawReceipt': purchaseToken};
         }
       } catch (e) {
         print("\n\n subscription controller ---- iOS verification error: $e");
         isValid = false;
+        paymentData = {'error': e.toString()};
       }
     } else {
       try {
@@ -867,13 +999,27 @@ class SubscriptionController extends GetxController {
               "\n\n subscription controller ---- Transaction date is null, using current time");
           purchaseDate = DateTime.now();
         }
+        expiryDate =
+            _getSubscriptionExpiryDate(purchaseDetails.productID, purchaseDate);
+        try {
+          paymentData = jsonDecode(
+              purchaseDetails.verificationData.localVerificationData);
+          autoRenewing = paymentData!['autoRenewing'] ?? true;
+          orderId = paymentData['orderId'] ?? purchaseDetails.purchaseID ?? '';
+        } catch (e) {
+          print(
+              "\n\n subscription controller ---- Error parsing payment data as JSON: $e");
+          paymentData = {
+            'rawData': purchaseDetails.verificationData.localVerificationData
+          };
+        }
       } catch (e) {
         print(
             "\n\n subscription controller ---- Error parsing transaction date: $e, using current time");
         purchaseDate = DateTime.now();
+        expiryDate =
+            _getSubscriptionExpiryDate(purchaseDetails.productID, purchaseDate);
       }
-      expiryDate =
-          _getSubscriptionExpiryDate(purchaseDetails.productID, purchaseDate);
     }
 
     if (!isValid) {
@@ -887,14 +1033,6 @@ class SubscriptionController extends GetxController {
     }
 
     try {
-      String purchaseToken = Platform.isIOS
-          ? purchaseDetails.verificationData.localVerificationData
-          : purchaseDetails.purchaseID ?? '';
-
-      if (purchaseToken.isEmpty) {
-        throw Exception("Purchase token is empty");
-      }
-
       final userId = FirebaseAuth.instance.currentUser?.uid;
       if (userId == null) {
         print("\n\n subscription controller ---- No user logged in");
@@ -910,10 +1048,13 @@ class SubscriptionController extends GetxController {
 
       await FirebaseFirestore.instance.collection('users').doc(userId).set({
         'Active': true,
+        'PurchaseToken': purchaseToken,
+        'AutoRenewing': autoRenewing,
+        'OrderId': orderId,
+        'paymentMethod': paymentMethod,
         'SubscriptionType': purchaseDetails.productID,
         'SubscriptionStartDate': Timestamp.fromDate(purchaseDate),
         'SubscriptionExpiryDate': Timestamp.fromDate(expiryDate),
-        'PurchaseToken': purchaseToken,
         'updatedAt': FieldValue.serverTimestamp(),
         'releaseDate': userData['releaseDate'] ?? FieldValue.serverTimestamp(),
         'lastLogin': userData['lastLogin'] ?? FieldValue.serverTimestamp(),
@@ -934,27 +1075,41 @@ class SubscriptionController extends GetxController {
           SubscriptionPlan.getById(purchaseDetails.productID);
       final productDetails = productDetailsMap.value[purchaseDetails.productID];
 
-      String statusMessage = purchaseDetails.status == PurchaseStatus.purchased
-          ? "Purchase Successful!"
-          : "Subscription Restored!";
-
       isProcessing.value = false;
 
-      Get.dialog(
-        SmartPopup(
-          buttonAlignment: ButtonAlignment.horizontal,
-          title: statusMessage,
-          subTitle:
-              'You have successfully subscribed to ${plan?.name ?? "plan"} for ${productDetails?.price ?? "\₹99.00"}.',
-          primaryButtonText: "OK",
-          primaryButtonTap: () {
-            Get.back();
-            Get.offAll(() => BottomBarTabs());
-          },
-          popType: PopType.success,
-          animationType: AnimationType.size,
-        ),
-      );
+      if (purchaseDetails.status == PurchaseStatus.purchased) {
+        Get.dialog(
+          SmartPopup(
+            title: "Purchase Successful!",
+            subTitle:
+                'You have successfully subscribed to ${plan?.name ?? "plan"} for ${productDetails?.price ?? "\₹99.00"}.',
+            primaryButtonText: "OK",
+            primaryButtonTap: () {
+              Get.back();
+              Get.offAll(() => Confirmation());
+            },
+            popType: PopType.success,
+            animationType: AnimationType.size,
+          ),
+        );
+      } else if (purchaseDetails.status == PurchaseStatus.restored) {
+        Get.dialog(
+          SmartPopup(
+            title: "Subscription Restored!",
+            subTitle:
+                'Your existing subscription to ${plan?.name ?? "plan"} has been restored.',
+            primaryButtonText: "OK",
+            primaryButtonTap: () {
+              Get.back();
+              Get.offAll(() => BottomBarTabs());
+            },
+            popType: PopType.success,
+            animationType: AnimationType.size,
+          ),
+        );
+      } else {
+        //
+      }
     } catch (e) {
       print(
           "\n\n subscription controller ---- Error processing successful purchase: $e");
@@ -978,62 +1133,12 @@ class SubscriptionController extends GetxController {
     }
   }
 
-  Future<Map<String, dynamic>?> _getReceiptInfo(String receiptData) async {
-    final bool isSandbox = false;
-    final String url = isSandbox
-        ? "https://sandbox.itunes.apple.com/verifyReceipt"
-        : "https://buy.itunes.apple.com/verifyReceipt";
-
-    final Map<String, dynamic> requestBody = {
-      'receipt-data': receiptData,
-      'password': 'fde1c8b51a044cd78dbe1bfa073dd77f',
-      'exclude-old-transactions': true
-    };
-
-    try {
-      final http.Response response = await http.post(
-        Uri.parse(url),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode(requestBody),
-      );
-
-      if (response.statusCode != 200) {
-        print(
-            "\n\n subscription controller ---- HTTP error: ${response.statusCode}");
-        return null;
-      }
-
-      final Map<String, dynamic> result = json.decode(response.body);
-
-      if (result['status'] == 0) {
-        List<dynamic> inAppPurchases = result['latest_receipt_info'] ?? [];
-        for (var purchase in inAppPurchases) {
-          if (purchase['product_id'] == iosPremiumPlanId) {
-            int purchaseDateMs = int.parse(purchase['purchase_date_ms'] ?? '0');
-            int expiresDateMs = int.parse(purchase['expires_date_ms'] ?? '0');
-            return {
-              'purchaseDate':
-                  DateTime.fromMillisecondsSinceEpoch(purchaseDateMs),
-              'expiryDate': DateTime.fromMillisecondsSinceEpoch(expiresDateMs),
-            };
-          }
-        }
-      } else if (result['status'] == 21007 && !isSandbox) {
-        return await _getReceiptInfo(receiptData);
-      }
-      return null;
-    } catch (e) {
-      print("\n\n subscription controller ---- Error parsing receipt info: $e");
-      return null;
-    }
-  }
-
   DateTime _getSubscriptionExpiryDate(String productId, DateTime purchaseDate) {
     SubscriptionPlan? plan = SubscriptionPlan.getById(productId);
     if (plan != null) {
       return purchaseDate.add(Duration(days: plan.durationInDays));
     }
-    return purchaseDate.add(const Duration(days: 365)); // Default to 1 year
+    return purchaseDate.add(const Duration(days: 365));
   }
 
   Future<Map<String, dynamic>?> getCurrentSubscriptionDetails() async {
@@ -1142,15 +1247,22 @@ class SubscriptionController extends GetxController {
   }
 
   Future<void> restorePurchases() async {
-    // Check if the user is a test user via SharedPreferences
+    print("===============this was called===============restore");
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool isTestUser = prefs.getBool('isTestUser') ?? false;
+    final userId = FirebaseAuth.instance.currentUser?.uid ?? 'unknown';
 
-    // Skip restoration for test user
     if (isTestUser) {
       print(
           "\n\n subscription controller ---- Test user detected, skipping purchase restoration");
-      isProcessing.value = false; // Reset processing state
+      await _logPurchaseVerification(
+        userId: userId,
+        productId: 'none',
+        action: 'restore_purchase',
+        status: 'skipped',
+        errorMessage: 'Test user detected',
+      );
+      isProcessing.value = false;
       return;
     }
 
@@ -1160,8 +1272,22 @@ class SubscriptionController extends GetxController {
       isProcessing.value = true;
       await inAppPurchase.restorePurchases();
       await checkSubscriptionStatus();
+      await _logPurchaseVerification(
+        userId: userId,
+        productId: 'none',
+        action: 'restore_purchase',
+        status: 'success',
+        verificationResult: {'message': 'Restore completed'},
+      );
     } catch (e) {
       print("\n\n subscription controller ---- Error restoring purchases: $e");
+      await _logPurchaseVerification(
+        userId: userId,
+        productId: 'none',
+        action: 'restore_purchase',
+        status: 'error',
+        errorMessage: e.toString(),
+      );
       Get.dialog(
         SmartPopup(
           title: "Error",
@@ -1184,623 +1310,3 @@ class SubscriptionController extends GetxController {
     super.onClose();
   }
 }
-
-// import 'dart:convert';
-// import 'dart:io';
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:get/get.dart';
-// import 'package:http/http.dart' as http;
-// import 'package:in_app_purchase/in_app_purchase.dart';
-// import 'package:intl/intl.dart';
-// import 'package:smart_popup/smart_popup.dart';
-// import 'package:url_launcher/url_launcher.dart';
-// import 'package:videos_alarm_app/Controller/sub.model.dart';
-// import 'package:videos_alarm_app/screens/banner_video_list.dart';
-
-// class SubscriptionController extends GetxController {
-//   var isAvailable = false.obs;
-//   var isProcessing = false.obs;
-//   RxString subscriptionType = "".obs;
-
-//   late InAppPurchase inAppPurchase;
-//   var nowactive = true.obs;
-//   RxString planName = 'Unknown Plan'.obs;
-//   RxString price = '\₹99.00'.obs;
-
-//   final Rx<Map<String, ProductDetails>> productDetailsMap =
-//       Rx<Map<String, ProductDetails>>({});
-
-//   // Product IDs for both platforms
-//   static const String androidBasicPlanId = 'vip_plan_id';
-//   static const String iosPremiumPlanId = 'com.videosalarm.subscription.premium';
-
-//   @override
-//   void onInit() async {
-//     super.onInit();
-//     inAppPurchase = InAppPurchase.instance;
-//     await _initializeBillingClient();
-//     await _checkAvailability();
-//     await loadProductDetails();
-//     await getDetails();
-
-//     final Stream<List<PurchaseDetails>> purchaseUpdated =
-//         inAppPurchase.purchaseStream;
-//     purchaseUpdated.listen(
-//       (purchaseDetailsList) {
-//         _listenToPurchaseUpdated(purchaseDetailsList);
-//       },
-//       onDone: () {
-//         print("\n\n subscription controller ---- Purchase stream done");
-//       },
-//       onError: (error) {
-//         print(
-//             "\n\n subscription controller ---- Error in purchase stream: $error");
-//         isProcessing.value = false;
-//       },
-//     );
-//   }
-
-//   Future<void> _initializeBillingClient() async {
-//     try {
-//       final isBillingAvailable = await inAppPurchase.isAvailable();
-//       print('Billing client available: $isBillingAvailable');
-//       if (!isBillingAvailable) {
-//         print('Billing client is not available');
-//         return;
-//       }
-//     } catch (e) {
-//       print('Error initializing billing client: $e');
-//     }
-//   }
-
-//   Future<void> _checkAvailability() async {
-//     try {
-//       isAvailable.value = await inAppPurchase.isAvailable();
-//       print('In-app purchase available: ${isAvailable.value}');
-//     } catch (e) {
-//       print('Error checking availability: $e');
-//     }
-//   }
-
-//   Future<void> loadProductDetails() async {
-//     final Set<String> productIds = {
-//       Platform.isIOS ? iosPremiumPlanId : androidBasicPlanId,
-//     };
-
-//     try {
-//       print('Querying product details for: $productIds');
-//       final ProductDetailsResponse response =
-//           await inAppPurchase.queryProductDetails(productIds);
-
-//       if (response.notFoundIDs.isNotEmpty) {
-//         print('Products not found: ${response.notFoundIDs}');
-//       }
-
-//       if (response.productDetails.isEmpty) {
-//         print('No product details found');
-//         return;
-//       }
-
-//       final Map<String, ProductDetails> detailsMap = {
-//         for (var detail in response.productDetails) detail.id: detail
-//       };
-//       productDetailsMap.value = detailsMap;
-
-//       for (var detail in response.productDetails) {
-//         print('Product ID: ${detail.id}');
-//         print('Product Title: ${detail.title}');
-//         print('Product Description: ${detail.description}');
-//         print('Product Price: ${detail.price}');
-//       }
-//     } catch (e) {
-//       print('Error loading product details: $e');
-//     }
-//   }
-
-//   Future<void> getDetails() async {
-//     try {
-//       User? currentUser = FirebaseAuth.instance.currentUser;
-//       if (currentUser == null) {
-//         print("\n\n subscription controller ---- No user is logged in");
-//         return;
-//       }
-
-//       String userId = currentUser.uid;
-//       DocumentSnapshot userDoc = await FirebaseFirestore.instance
-//           .collection('users')
-//           .doc(userId)
-//           .get();
-
-//       if (userDoc.exists) {
-//         Map<String, dynamic>? userData =
-//             userDoc.data() as Map<String, dynamic>?;
-//         if (userData != null) {
-//           subscriptionType.value = userData['SubscriptionType'] ?? 'None';
-//           print(
-//               "\n\n subscription controller ---- Current subscription type: ${subscriptionType.value}");
-
-//           if (userData['Active'] == true) {
-//             nowactive.value = true;
-
-//             // Get plan details
-//             SubscriptionPlan? plan =
-//                 SubscriptionPlan.getById(subscriptionType.value);
-//             planName.value = plan?.name ?? 'Unknown Plan';
-
-//             // Get price from product details if available
-//             final productDetails =
-//                 productDetailsMap.value[subscriptionType.value];
-//             price.value = productDetails?.price ?? '\₹99.00';
-//           } else {
-//             nowactive.value = false;
-//           }
-//         }
-//       } else {
-//         print("\n\n subscription controller ---- User document does not exist");
-//       }
-//     } catch (e) {
-//       print(
-//           "\n\n subscription controller ---- Error getting subscription details: $e");
-//     }
-//   }
-
-//   Future<void> purchaseSubscription() async {
-//     if (!isAvailable.value) {
-//       // Get.snackbar("Error", "In-app purchase is not available");
-//       return;
-//     }
-
-//     String productId = Platform.isIOS ? iosPremiumPlanId : androidBasicPlanId;
-//     final ProductDetails? productDetails = productDetailsMap.value[productId];
-
-//     if (productDetails == null) {
-//       // Get.snackbar("Error", "Product details not found. Please try again later.");
-//       return;
-//     }
-
-//     try {
-//       isProcessing.value = true;
-
-//       // For iOS, we need to use different purchase method
-//       if (Platform.isIOS) {
-//         await inAppPurchase.buyConsumable(
-//             purchaseParam: PurchaseParam(productDetails: productDetails));
-//       } else {
-//         await inAppPurchase.buyNonConsumable(
-//             purchaseParam: PurchaseParam(productDetails: productDetails));
-//       }
-
-//       // Don't set isProcessing to false here, it will be set in the purchase listener
-//     } catch (e) {
-//       isProcessing.value = false;
-//       print("\n\n subscription controller ---- Error initiating purchase: $e");
-//       // Get.snackbar("Purchase Error", "Failed to initiate purchase. Please try again.");
-//     }
-//   }
-
-//   Future<bool> verifyIOSPurchase(PurchaseDetails purchaseDetails) async {
-//     try {
-//       final String receiptData =
-//           purchaseDetails.verificationData.serverVerificationData;
-//       if (receiptData.isEmpty) {
-//         print("\n\n subscription controller ---- Empty receipt data");
-//         return false;
-//       }
-
-//       // DEVELOPMENT MODE: Uncomment for testing and comment out for production
-//       // print("\n\n subscription controller ---- Development mode: Skipping receipt validation");
-//       // return true;
-
-//       // PRODUCTION MODE: Validate receipt with Apple's servers
-//       bool isValid = await _validateReceipt(receiptData, isSandbox: false);
-
-//       // If validation fails with "Sandbox receipt used in production," validate against the test environment
-//       if (!isValid) {
-//         print(
-//             "\n\n subscription controller ---- Production validation failed. Attempting sandbox validation.");
-//         isValid = await _validateReceipt(receiptData, isSandbox: true);
-//       }
-
-//       return isValid;
-//     } catch (e) {
-//       print(
-//           "\n\n subscription controller ---- Error verifying iOS purchase: $e");
-//       return false;
-//     }
-//   }
-
-//   Future<bool> _validateReceipt(String receiptData,
-//       {required bool isSandbox}) async {
-//     final String url = isSandbox
-//         ? "https://sandbox.itunes.apple.com/verifyReceipt"
-//         : "https://buy.itunes.apple.com/verifyReceipt";
-
-//     final Map<String, dynamic> requestBody = {
-//       'receipt-data': receiptData,
-//       'password':
-//           'fde1c8b51a044cd78dbe1bfa073dd77f', // Replace with your App Store Connect shared secret
-//       'exclude-old-transactions': true
-//     };
-
-//     try {
-//       final http.Response response = await http.post(
-//         Uri.parse(url),
-//         headers: {'Content-Type': 'application/json'},
-//         body: json.encode(requestBody),
-//       );
-
-//       if (response.statusCode != 200) {
-//         print(
-//             "\n\n subscription controller ---- HTTP error: ${response.statusCode}");
-//         print(
-//             "\n\n subscription controller ---- Response body: ${response.body}");
-//         return false;
-//       }
-
-//       final Map<String, dynamic> result = json.decode(response.body);
-
-//       if (result['status'] == 0) {
-//         print(
-//             "iOS purchase verified successfully against ${isSandbox ? 'sandbox' : 'production'}: $result");
-//         return true;
-//       } else if (result['status'] == 21007 && !isSandbox) {
-//         print(
-//             "Sandbox receipt used in production environment. Needs validation against sandbox.");
-//         return false; // Signal to try sandbox.
-//       } else {
-//         print(
-//             "iOS purchase verification failed against ${isSandbox ? 'sandbox' : 'production'}: ${result['status']}");
-//         return false;
-//       }
-//     } catch (e) {
-//       print(
-//           "Error validating receipt against ${isSandbox ? 'sandbox' : 'production'}: $e");
-//       return false;
-//     }
-//   }
-
-//   Future<void> _listenToPurchaseUpdated(
-//       List<PurchaseDetails> purchaseDetailsList) async {
-//     for (final PurchaseDetails purchaseDetails in purchaseDetailsList) {
-//       try {
-//         print(
-//             "Purchase update: ${purchaseDetails.status} for ${purchaseDetails.productID}");
-
-//         if (purchaseDetails.status == PurchaseStatus.pending) {
-//           print("\n\n subscription controller ---- Purchase is pending");
-//           _showPendingUI();
-//         } else if (purchaseDetails.status == PurchaseStatus.error) {
-//           print(
-//               "\n\n subscription controller ---- Purchase error: ${purchaseDetails.error?.message}");
-//           _handleError(purchaseDetails.error);
-//         } else if (purchaseDetails.status == PurchaseStatus.purchased ||
-//             purchaseDetails.status == PurchaseStatus.restored) {
-//           print(
-//               "\n\n subscription controller ---- Purchase successful or restored");
-//           await _handleSuccessfulPurchase(purchaseDetails);
-//         } else if (purchaseDetails.status == PurchaseStatus.canceled) {
-//           print("\n\n subscription controller ---- Purchase canceled");
-//           isProcessing.value = false;
-//         }
-
-//         if (purchaseDetails.pendingCompletePurchase) {
-//           print("\n\n subscription controller ---- Completing purchase");
-//           await inAppPurchase.completePurchase(purchaseDetails);
-//         }
-//       } catch (e) {
-//         print(
-//             "\n\n subscription controller ---- Error processing purchase update: $e");
-//         isProcessing.value = false;
-//       }
-//     }
-//   }
-
-//   void _showPendingUI() {}
-
-//   void _handleError(IAPError? error) {
-//     isProcessing.value = false;
-//     String errorMessage = error?.message ?? "An unknown error occurred";
-//     print("\n\n subscription controller ---- Purchase error: $errorMessage");
-
-//     Get.dialog(
-//       SmartPopup(
-//         buttonAlignment: ButtonAlignment.horizontal,
-//         title: "Purchase Failed",
-//         subTitle: errorMessage,
-//         primaryButtonText: "OK",
-//         popType: PopType.error,
-//         animationType: AnimationType.scale,
-//         primaryButtonTap: () {
-//           Get.back();
-//         },
-//       ),
-//     );
-//   }
-
-//   Future<void> _handleSuccessfulPurchase(
-//       PurchaseDetails purchaseDetails) async {
-//     bool isValid = true;
-
-//     if (Platform.isIOS) {
-//       try {
-//         isValid = await verifyIOSPurchase(purchaseDetails);
-//       } catch (e) {
-//         print("\n\n subscription controller ---- iOS verification error: $e");
-//         isProcessing.value = false;
-//         return;
-//       }
-//     }
-
-//     if (!isValid) {
-//       isProcessing.value = false;
-//       return;
-//     }
-
-//     try {
-//       DateTime purchaseDate;
-//       try {
-//         if (purchaseDetails.transactionDate != null) {
-//           int timestamp = int.parse(purchaseDetails.transactionDate!);
-//           purchaseDate = DateTime.fromMillisecondsSinceEpoch(timestamp);
-//         } else {
-//           print(
-//               "\n\n subscription controller ---- Transaction date is null, using current time");
-//           purchaseDate = DateTime.now();
-//         }
-//       } catch (e) {
-//         print(
-//             "\n\n subscription controller ---- Error parsing transaction date: $e, using current time");
-//         purchaseDate = DateTime.now();
-//       }
-
-//       DateTime expiryDate =
-//           _getSubscriptionExpiryDate(purchaseDetails.productID, purchaseDate);
-
-//       String purchaseToken = Platform.isIOS
-//           ? purchaseDetails.verificationData.localVerificationData
-//           : purchaseDetails.purchaseID ?? '';
-
-//       await _updateUserActiveStatus(
-//         purchaseDetails.productID,
-//         purchaseToken,
-//         purchaseDate,
-//         expiryDate,
-//       );
-
-//       await getDetails(); // Refresh subscription details
-
-//       SubscriptionPlan? plan =
-//           SubscriptionPlan.getById(purchaseDetails.productID);
-//       final productDetails = productDetailsMap.value[purchaseDetails.productID];
-
-//       String statusMessage = purchaseDetails.status == PurchaseStatus.purchased
-//           ? "Purchase Successful!"
-//           : "Subscription Restored!";
-
-//       isProcessing.value = false;
-
-//       Get.dialog(
-//         SmartPopup(
-//           buttonAlignment: ButtonAlignment.horizontal,
-//           title: statusMessage,
-//           subTitle:
-//               'You have successfully subscribed to ${plan?.name ?? "plan"} for ${productDetails?.price ?? "\₹99.00"}.',
-//           primaryButtonText: "OK",
-//           primaryButtonTap: () {
-//             Get.back();
-//             // Navigate to main screen only after user acknowledges the success
-//             Get.offAll(() => BottomBarTabs());
-//           },
-//           popType: PopType.success,
-//           animationType: AnimationType.size,
-//         ),
-//       );
-//     } catch (e) {
-//       print(
-//           "\n\n subscription controller ---- Error processing successful purchase: $e");
-//       isProcessing.value = false;
-
-//       Get.dialog(
-//         SmartPopup(
-//           buttonAlignment: ButtonAlignment.horizontal,
-//           title: "Processing Error",
-//           subTitle:
-//               'An error occurred while processing your subscription. Please contact support.',
-//           primaryButtonText: "OK",
-//           primaryButtonTap: () {
-//             Get.back();
-//           },
-//           popType: PopType.error,
-//           animationType: AnimationType.scale,
-//         ),
-//       );
-//     }
-//   }
-
-//   Future<void> _updateUserActiveStatus(String productId, String purchaseToken,
-//       DateTime purchaseDate, DateTime expiryDate) async {
-//     User? currentUser = FirebaseAuth.instance.currentUser;
-
-//     if (currentUser != null) {
-//       String userId = currentUser.uid;
-
-//       try {
-//         DocumentSnapshot userDoc = await FirebaseFirestore.instance
-//             .collection('users')
-//             .doc(userId)
-//             .get();
-
-//         if (userDoc.exists) {
-//           await FirebaseFirestore.instance
-//               .collection('users')
-//               .doc(userId)
-//               .update({
-//             'Active': true,
-//             'SubscriptionStartDate': purchaseDate,
-//             'SubscriptionExpiryDate': expiryDate,
-//             'SubscriptionType': productId,
-//             'PurchaseToken': purchaseToken,
-//             'updatedAt': FieldValue.serverTimestamp(),
-//           });
-//           print(
-//               "\n\n subscription controller ---- User status updated in Firestore");
-//         } else {
-//           print("\n\n subscription controller ---- User document not found");
-//           await FirebaseFirestore.instance.collection('users').doc(userId).set({
-//             'Active': true,
-//             'SubscriptionStartDate': purchaseDate,
-//             'SubscriptionExpiryDate': expiryDate,
-//             'SubscriptionType': productId,
-//             'PurchaseToken': purchaseToken,
-//             'userId': userId,
-//             'releaseDate': FieldValue.serverTimestamp(),
-//             'updatedAt': FieldValue.serverTimestamp(),
-//           });
-//           print(
-//               "\n\n subscription controller ---- Created new user document with subscription info");
-//         }
-//       } catch (e) {
-//         print(
-//             "\n\n subscription controller ---- Error updating user status: $e");
-//         throw Exception("Failed to update user status: $e");
-//       }
-//     } else {
-//       print("\n\n subscription controller ---- No user logged in");
-//       throw Exception("No user logged in");
-//     }
-//   }
-
-//   DateTime _getSubscriptionExpiryDate(String productId, DateTime purchaseDate) {
-//     SubscriptionPlan? plan = SubscriptionPlan.getById(productId);
-//     if (plan != null) {
-//       return purchaseDate.add(Duration(days: plan.durationInDays));
-//     }
-//     return purchaseDate.add(const Duration(days: 365)); // Default to 1 year
-//   }
-
-//   Future<Map<String, dynamic>?> getCurrentSubscriptionDetails() async {
-//     User? currentUser = FirebaseAuth.instance.currentUser;
-
-//     if (currentUser != null) {
-//       String userId = currentUser.uid;
-
-//       try {
-//         DocumentSnapshot userDoc = await FirebaseFirestore.instance
-//             .collection('users')
-//             .doc(userId)
-//             .get();
-
-//         if (userDoc.exists) {
-//           Map<String, dynamic>? userData =
-//               userDoc.data() as Map<String, dynamic>?;
-//           if (userData == null) return null;
-
-//           if (!userData.containsKey('SubscriptionExpiryDate')) {
-//             return null; // No subscription data
-//           }
-
-//           DateTime expiryDate =
-//               (userData['SubscriptionExpiryDate'] as Timestamp).toDate();
-//           String subscriptionType = userData['SubscriptionType'] ?? 'None';
-//           bool isActive = userData['Active'] ?? false;
-
-//           final productDetails = productDetailsMap.value[subscriptionType];
-//           SubscriptionPlan? plan = SubscriptionPlan.getById(subscriptionType);
-
-//           planName.value = plan?.name ?? 'No Subscription';
-//           price.value = productDetails?.price ?? '\₹99.00';
-
-//           if (isActive) {
-//             return {
-//               'planName': planName.value,
-//               'price': price.value,
-//               'description': getSubscriptionDescription(subscriptionType),
-//               'expiryDate': DateFormat('yyyy-MM-dd').format(expiryDate),
-//             };
-//           }
-//         }
-//       } catch (e) {
-//         print(
-//             "\n\n subscription controller ---- Error getting subscription details: $e");
-//       }
-//     }
-
-//     return null;
-//   }
-
-//   String getSubscriptionDescription(String productId) {
-//     return SubscriptionPlan.getDescriptionById(productId);
-//   }
-
-//   Future<void> checkSubscriptionExpiry() async {
-//     try {
-//       User? currentUser = FirebaseAuth.instance.currentUser;
-//       if (currentUser != null) {
-//         String userId = currentUser.uid;
-//         DocumentSnapshot userDoc = await FirebaseFirestore.instance
-//             .collection('users')
-//             .doc(userId)
-//             .get();
-
-//         if (userDoc.exists) {
-//           Map<String, dynamic>? userData =
-//               userDoc.data() as Map<String, dynamic>?;
-//           if (userData == null) return;
-
-//           if (userData.containsKey('SubscriptionExpiryDate')) {
-//             DateTime expiryDate =
-//                 (userData['SubscriptionExpiryDate'] as Timestamp).toDate();
-//             if (DateTime.now().isAfter(expiryDate)) {
-//               await FirebaseFirestore.instance
-//                   .collection('users')
-//                   .doc(userId)
-//                   .update({
-//                 'Active': false,
-//                 'updatedAt': FieldValue.serverTimestamp(),
-//               });
-//               nowactive.value = false;
-//               print(
-//                   "\n\n subscription controller ---- Subscription expired, set Active to false");
-//             }
-//           }
-//         }
-//       }
-//     } catch (e) {
-//       print(
-//           "\n\n subscription controller ---- Error checking subscription expiry: $e");
-//     }
-//   }
-
-//   Future<void> openCancellationPage() async {
-//     String url = '';
-//     if (Platform.isIOS) {
-//       url = 'itms-apps://apps.apple.com/account/subscriptions';
-//     } else if (Platform.isAndroid) {
-//       url = 'https://play.google.com/store/account/subscriptions';
-//     }
-
-//     try {
-//       if (await canLaunchUrl(Uri.parse(url))) {
-//         await launchUrl(Uri.parse(url));
-//       } else {
-//         throw 'Could not launch $url';
-//       }
-//     } catch (e) {
-//       print('Error opening cancellation page: $e');
-//       // Get.snackbar("Error", "Could not open subscription settings.");
-//     }
-//   }
-
-//   Future<void> restorePurchases() async {
-//     try {
-//       print(
-//           "\n\n subscription controller ---- Attempting to restore purchases");
-//       isProcessing.value = true;
-//       await inAppPurchase.restorePurchases();
-//     } catch (e) {
-//       isProcessing.value = false;
-//       print("\n\n subscription controller ---- Error restoring purchases: $e");
-//     }
-//   }
-// }

@@ -1,20 +1,3 @@
-// import 'package:get/get.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
-
-// class AppPref{
-//   static Future<bool> initSessionManager() async {
-//     var prefs = await SharedPreferences.getInstance();
-//     Get.put(prefs);
-//     return true;
-//   }
-
-//   static setUniqueToken() {SharedPreferences pref = Get.find();pref.setString("unique_token", "unique_token_is_not_empty");}
-//   static String getUniqueToken() {SharedPreferences pref = Get.find();return pref.getString("unique_token") ?? "";}
-
-//   // remove Token
-//   static removeUniqueToken() {SharedPreferences pref = Get.find();pref.remove("unique_token");}
-// }
-
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -50,5 +33,35 @@ class AppPref {
 
   static Future<void> setFirstTimeNotificationRequest(bool value) async {
     await _prefs.setBool('firstTimeNotificationRequest', value);
+  }
+
+  // Generic method to set a boolean value
+  static Future<void> setBool(String key, bool value) async {
+    await _prefs.setBool(key, value);
+  }
+
+  // Generic method to get a boolean value
+  static Future<bool?> getBool(String key) async {
+    return _prefs.getBool(key);
+  }
+
+  // Specific method to set isAndroidTV flag
+  static Future<void> setIsAndroidTV(bool value) async {
+    await setBool('isAndroidTV', value);
+  }
+
+  // Specific method to get isAndroidTV flag
+  static Future<bool> getIsAndroidTV() async {
+    return await getBool('isAndroidTV') ?? false;
+  }
+
+  // Specific method to set isAndroidPhone flag
+  static Future<void> setIsAndroidPhone(bool value) async {
+    await setBool('isAndroidPhone', value);
+  }
+
+  // Specific method to get isAndroidPhone flag
+  static Future<bool> getIsAndroidPhone() async {
+    return await getBool('isAndroidPhone') ?? false;
   }
 }

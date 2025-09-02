@@ -175,6 +175,7 @@ class CurrentSubscriptionCard extends StatelessWidget {
           if (response.statusCode == 200) {
             final data = json.decode(response.body);
 
+            // ignore: unused_local_variable
             final status = data['status'];
             final autoRenewing = data['autoRenewing'] ?? false;
             final canceled = data['canceled'] ?? false;
@@ -239,6 +240,7 @@ class CurrentSubscriptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
     final SubscriptionController subscriptionController =
         Get.find<SubscriptionController>();
 

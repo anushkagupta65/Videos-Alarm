@@ -394,17 +394,21 @@ class _SubscriptionAlertState extends State<SubscriptionAlert> {
             constraints: const BoxConstraints(maxWidth: 400),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              color: Colors.black87,
+              color: Colors.grey[900]!.withOpacity(0.7),
             ),
             padding: const EdgeInsets.all(20),
             child: AnimatedScale(
               scale: _isVisible ? 1.0 : 0.0,
-              duration: const Duration(milliseconds: 500),
+              duration: const Duration(milliseconds: 850),
               curve: Curves.easeOut,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(BoxIcons.bx_lock, size: 50, color: Colors.white),
+                  Icon(
+                    BoxIcons.bx_crown,
+                    size: 72,
+                    color: Colors.yellowAccent[700]!.withOpacity(0.9),
+                  ),
                   const SizedBox(height: 20),
                   Text(
                     "A subscription is required\nto access this content.",
@@ -420,7 +424,7 @@ class _SubscriptionAlertState extends State<SubscriptionAlert> {
                   ElevatedButton(
                     onPressed: widget.onActivate,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
+                      backgroundColor: Colors.blueAccent[400],
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(
                           horizontal: 30, vertical: 12),
@@ -428,8 +432,15 @@ class _SubscriptionAlertState extends State<SubscriptionAlert> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: const Text("Activate Account",
-                        style: TextStyle(fontSize: 16)),
+                    child: const Text(
+                      "Activate Account",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.1,
+                        wordSpacing: 1.3,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -517,7 +528,8 @@ class ViewVideo extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        elevation: 0,
+        centerTitle: true,
+        elevation: 3,
         backgroundColor: Colors.black,
         title: Obx(() => Text(
               controller.videoController.currentVideoTitle.value,
@@ -548,392 +560,393 @@ class ViewVideo extends StatelessWidget {
             builder: (controller) {
               return Stack(
                 children: [
-                  SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Bunny Stream Better Player Section
-                        SizedBox(
-                          height: 240,
-                          width: double.infinity,
-                          child: Stack(
-                            children: [
-                              // Show Bunny Stream Better Player
-
-                              if (videoLink != null && videoLink!.isNotEmpty)
-                                Builder(
-                                  builder: (context) {
-                                    final parsedUrl =
-                                        _parseBunnyStreamUrl(videoLink!);
-                                    if (parsedUrl != null) {
-                                      return BunnyStreamBetterPlayer(
-                                        pullZone: parsedUrl['pullZone']!,
-                                        videoId: parsedUrl['videoId']!,
-                                      );
-                                    } else {
-                                      return const Center(
-                                        child: Text(
-                                          'Invalid Bunny Stream URL format',
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      );
-                                    }
-                                  },
-                                )
-                              else
-                                const Center(
-                                  child: Text(
-                                    'No video URL available',
-                                    style: TextStyle(color: Colors.white),
+                  if (isSubscribed)
+                    SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                            height: 240,
+                            width: double.infinity,
+                            child: Stack(
+                              children: [
+                                if (videoLink != null && videoLink!.isNotEmpty)
+                                  Builder(
+                                    builder: (context) {
+                                      final parsedUrl =
+                                          _parseBunnyStreamUrl(videoLink!);
+                                      if (parsedUrl != null) {
+                                        return BunnyStreamBetterPlayer(
+                                          pullZone: parsedUrl['pullZone']!,
+                                          videoId: parsedUrl['videoId']!,
+                                        );
+                                      } else {
+                                        return const Center(
+                                          child: Text(
+                                            'Invalid Bunny Stream URL format',
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                  )
+                                else
+                                  const Center(
+                                    child: Text(
+                                      'No video URL available',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
                                   ),
-                                ),
-                            ],
-                          ),
-                        ),
-
-                        // Video Title
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 12),
-                          child: Text(
-                            videoTitle ?? "No Title",
-                            style: const TextStyle(
-                              fontSize: 22,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
+                              ],
                             ),
                           ),
-                        ),
 
-                        // Video Details (Year, CBFC, Duration)
-                        if (releaseYear != null ||
-                            cbfc != null ||
-                            duration != null) ...[
+                          // Video Title
                           Padding(
-                            padding:
-                                const EdgeInsets.only(left: 16, bottom: 12),
-                            child: Row(
-                              children: [
-                                if (releaseYear != null) ...[
-                                  Text(
-                                    releaseYear!,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.white70,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                ],
-                                if (cbfc != null) ...[
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 6, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.shade800,
-                                      border: Border.all(),
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    child: Text(
-                                      cbfc!,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
+                            child: Text(
+                              videoTitle ?? "No Title",
+                              style: const TextStyle(
+                                fontSize: 22,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+
+                          // Video Details (Year, CBFC, Duration)
+                          if (releaseYear != null ||
+                              cbfc != null ||
+                              duration != null) ...[
+                            Padding(
+                              padding:
+                                  const EdgeInsets.only(left: 16, bottom: 12),
+                              child: Row(
+                                children: [
+                                  if (releaseYear != null) ...[
+                                    Text(
+                                      releaseYear!,
                                       style: const TextStyle(
                                         fontSize: 14,
                                         color: Colors.white70,
                                         fontWeight: FontWeight.w500,
                                       ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                ],
-                                if (duration != null)
-                                  Text(
-                                    duration!,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.white70,
-                                      fontWeight: FontWeight.w500,
+                                    const SizedBox(width: 10),
+                                  ],
+                                  if (cbfc != null) ...[
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.shade800,
+                                        border: Border.all(),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        cbfc!,
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.white70,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
                                     ),
+                                    const SizedBox(width: 10),
+                                  ],
+                                  if (duration != null)
+                                    Text(
+                                      duration!,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.white70,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ],
+
+                          // Description
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Text(
+                              description ?? "No Description",
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Cast and Director
+                          if (starcast != null || director != null) ...[
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 6),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (starcast != null) ...[
+                                    Text(
+                                      "Cast: $starcast",
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.white70,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                  if (director != null) ...[
+                                    Text(
+                                      'Director: $director',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.white70,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          ],
+                          const SizedBox(height: 16),
+
+                          // Views Counter
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: videoId == null
+                                ? const Text(
+                                    'Views: N/A',
+                                    style: TextStyle(color: Colors.white),
+                                  )
+                                : StreamBuilder<DocumentSnapshot>(
+                                    stream: FirebaseFirestore.instance
+                                        .collection('bunny')
+                                        .doc(videoId)
+                                        .snapshots(),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return const Text(
+                                          'Views: Loading...',
+                                          style: TextStyle(color: Colors.white),
+                                        );
+                                      }
+
+                                      if (snapshot.hasError) {
+                                        return const Text(
+                                          'Views: Error',
+                                          style: TextStyle(color: Colors.white),
+                                        );
+                                      }
+
+                                      final doc = snapshot.data;
+
+                                      if (doc == null || !doc.exists) {
+                                        return const Text(
+                                          'Views: N/A',
+                                          style: TextStyle(color: Colors.white),
+                                        );
+                                      }
+
+                                      final views = (doc.data() as Map<String,
+                                              dynamic>)['views'] ??
+                                          0;
+
+                                      return Text(
+                                        'Views: $views',
+                                        style: const TextStyle(
+                                            color: Colors.white70),
+                                      );
+                                    },
                                   ),
-                              ],
-                            ),
                           ),
-                        ],
+                          const SizedBox(height: 20),
 
-                        // Description
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
-                            description ?? "No Description",
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Cast and Director
-                        if (starcast != null || director != null) ...[
+                          // Share Button
                           Padding(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 6),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
-                                if (starcast != null) ...[
-                                  Text(
-                                    "Cast: $starcast",
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.white70,
-                                      fontWeight: FontWeight.w500,
+                                WatchLaterButton(videoId: videoId!),
+                                const SizedBox(width: 12),
+                                Column(
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.share,
+                                        color: Colors.white,
+                                        size: 32,
+                                      ),
+                                      onPressed: () async {
+                                        try {
+                                          print('Starting video share process');
+                                          final videoID = videoId ?? '';
+                                          print(
+                                              'Fetching video document for ID: $videoID');
+                                          final videoDoc =
+                                              await FirebaseFirestore.instance
+                                                  .collection('bunny')
+                                                  .doc(videoID)
+                                                  .get();
+
+                                          final thumbnailURL =
+                                              videoDoc.data()?['thumbnailUrl']
+                                                      as String? ??
+                                                  '';
+                                          print(
+                                              'Retrieved thumbnail URL: $thumbnailURL');
+
+                                          final dynamicLinkService =
+                                              DynamicLinkService();
+                                          print(
+                                              'Creating dynamic link with parameters: '
+                                              'videoId=$videoID, '
+                                              'videoTitle=${videoTitle ?? 'Videos Alarm'}, '
+                                              'videoDescription=${description ?? 'Check out this amazing video on Videos Alarm!'}, '
+                                              'thumbnailUrl=$thumbnailURL');
+                                          final deepLink =
+                                              await dynamicLinkService
+                                                  .createShareVideoLink(
+                                            videoId: videoID,
+                                          );
+
+                                          print(
+                                              "Dynamic Link created: $deepLink");
+
+                                          if (deepLink.isNotEmpty) {
+                                            print('Sharing dynamic link');
+                                            Share.share(
+                                              'Tap on the below link to watch a video\n\n'
+                                              '$deepLink\n'
+                                              '\n'
+                                              'Sent by VideosAlarm.',
+                                              subject: 'Check out this video!',
+                                            );
+                                            print('Share action completed');
+                                          }
+                                        } catch (e) {
+                                          print(
+                                              "Error creating/sharing dynamic link: $e");
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                  'Failed to share video: $e'),
+                                            ),
+                                          );
+                                        }
+                                      },
                                     ),
-                                  ),
-                                ],
-                                if (director != null) ...[
-                                  Text(
-                                    'Director: $director',
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.white70,
-                                      fontWeight: FontWeight.w500,
+                                    const SizedBox(height: 12),
+                                    const Text(
+                                      "Share",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.white,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                )
                               ],
                             ),
                           ),
-                        ],
-                        const SizedBox(height: 16),
+                          const SizedBox(height: 20),
 
-                        // Views Counter
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: videoId == null
-                              ? const Text(
-                                  'Views: N/A',
-                                  style: TextStyle(color: Colors.white),
-                                )
-                              : StreamBuilder<DocumentSnapshot>(
-                                  stream: FirebaseFirestore.instance
-                                      .collection('bunny')
-                                      .doc(videoId)
-                                      .snapshots(),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.waiting) {
-                                      return const Text(
-                                        'Views: Loading...',
-                                        style: TextStyle(color: Colors.white),
-                                      );
-                                    }
-
-                                    if (snapshot.hasError) {
-                                      return const Text(
-                                        'Views: Error',
-                                        style: TextStyle(color: Colors.white),
-                                      );
-                                    }
-
-                                    final doc = snapshot.data;
-
-                                    if (doc == null || !doc.exists) {
-                                      return const Text(
-                                        'Views: N/A',
-                                        style: TextStyle(color: Colors.white),
-                                      );
-                                    }
-
-                                    // Extract views safely as integer
-                                    final views = (doc.data()
-                                            as Map<String, dynamic>)['views'] ??
-                                        0;
-
-                                    return Text(
-                                      'Views: $views',
-                                      style: const TextStyle(
-                                          color: Colors.white70),
-                                    );
-                                  },
-                                ),
-                        ),
-                        const SizedBox(height: 20),
-
-                        // Share Button
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              WatchLaterButton(videoId: videoId!),
-                              const SizedBox(width: 12),
-                              Column(
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.share,
-                                      color: Colors.white,
-                                      size: 32,
-                                    ),
-                                    onPressed: () async {
-                                      try {
-                                        print('Starting video share process');
-                                        final videoID = videoId ?? '';
-                                        print(
-                                            'Fetching video document for ID: $videoID');
-                                        final videoDoc = await FirebaseFirestore
-                                            .instance
-                                            .collection('bunny')
-                                            .doc(videoID)
-                                            .get();
-
-                                        final thumbnailURL =
-                                            videoDoc.data()?['thumbnailUrl']
-                                                    as String? ??
-                                                '';
-                                        print(
-                                            'Retrieved thumbnail URL: $thumbnailURL');
-
-                                        final dynamicLinkService =
-                                            DynamicLinkService();
-                                        print(
-                                            'Creating dynamic link with parameters: '
-                                            'videoId=$videoID, '
-                                            'videoTitle=${videoTitle ?? 'Videos Alarm'}, '
-                                            'videoDescription=${description ?? 'Check out this amazing video on Videos Alarm!'}, '
-                                            'thumbnailUrl=$thumbnailURL');
-                                        final deepLink =
-                                            await dynamicLinkService
-                                                .createShareVideoLink(
-                                          videoId: videoID,
-                                        );
-
-                                        print(
-                                            "Dynamic Link created: $deepLink");
-
-                                        if (deepLink.isNotEmpty) {
-                                          print('Sharing dynamic link');
-                                          Share.share(
-                                            'Tap on the below link to watch a video\n\n'
-                                            '$deepLink\n'
-                                            '\n'
-                                            'Sent by VideosAlarm.',
-                                            subject: 'Check out this video!',
-                                          );
-                                          print('Share action completed');
-                                        }
-                                      } catch (e) {
-                                        print(
-                                            "Error creating/sharing dynamic link: $e");
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                                'Failed to share video: $e'),
-                                          ),
-                                        );
-                                      }
-                                    },
-                                  ),
-                                  const SizedBox(height: 12),
-                                  const Text(
-                                    "Share",
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              )
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-
-                        // More Like This Section
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
-                            'More Like This',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                          // More Like This Section
+                          const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                            child: Text(
+                              'More Like This',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 10),
-                        SizedBox(
-                          height: 200,
-                          child: Obx(() => ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: controller
-                                    .videoController.sameCategoryVideos.length,
-                                itemBuilder: (context, index) {
-                                  final newvideo = controller.videoController
-                                      .sameCategoryVideos[index];
-                                  return GestureDetector(
-                                    onTap: () async {
-                                      print("this is pressed");
-                                      print(
-                                          "these are the details - \n releaseYear: ${newvideo['releaseYear']} \n starcast: ${newvideo['starcast']} \n videoId: ${newvideo['videoId']} \n cbfc: ${newvideo['cbfc']} \n duration: ${newvideo['duration']} \n videoLink: ${newvideo['videoUrl']} \n videoTitle: ${newvideo['title']} \n description: ${newvideo['description']}");
+                          const SizedBox(height: 10),
+                          SizedBox(
+                            height: 200,
+                            child: Obx(() => ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: controller.videoController
+                                      .sameCategoryVideos.length,
+                                  itemBuilder: (context, index) {
+                                    final newvideo = controller.videoController
+                                        .sameCategoryVideos[index];
+                                    return GestureDetector(
+                                      onTap: () async {
+                                        print("this is pressed");
+                                        print(
+                                            "these are the details - \n releaseYear: ${newvideo['releaseYear']} \n starcast: ${newvideo['starcast']} \n videoId: ${newvideo['videoId']} \n cbfc: ${newvideo['cbfc']} \n duration: ${newvideo['duration']} \n videoLink: ${newvideo['videoUrl']} \n videoTitle: ${newvideo['title']} \n description: ${newvideo['description']}");
 
-                                      // Get the thumbnail (adjust this if your schema is different)
-                                      String? thumbnailUrl =
-                                          newvideo['thumbnailUrl'];
+                                        // Get the thumbnail (adjust this if your schema is different)
+                                        String? thumbnailUrl =
+                                            newvideo['thumbnailUrl'];
 
-                                      bool? result = await showDialog<bool>(
-                                        context: context,
-                                        barrierDismissible: true,
-                                        builder: (context) =>
-                                            VideoPreviewDialog(
-                                          title: newvideo['title'],
-                                          description: newvideo['description'],
-                                          thumbnailUrl: thumbnailUrl,
-                                          duration: newvideo['duration'],
-                                          releaseYear: newvideo['releaseYear'],
-                                          cbfc: newvideo['cbfc'],
-                                          starcast: newvideo['starcast'],
-                                        ),
-                                      );
-
-                                      if (result == true) {
-                                        Navigator.of(context).pushReplacement(
-                                          MaterialPageRoute(
-                                            builder: (_) => ViewVideo(
-                                              releaseYear:
-                                                  newvideo['releaseYear'],
-                                              starcast: newvideo['starcast'],
-                                              cbfc: newvideo['cbfc'],
-                                              myList: newvideo['myList'],
-                                              duration: newvideo['duration'],
-                                              director: newvideo['director'],
-                                              videoLink: newvideo['videoUrl'],
-                                              videoTitle: newvideo['title'],
-                                              description:
-                                                  newvideo['description'],
-                                              category: category,
-                                              videoId: newvideo['videoId'],
-                                            ),
+                                        bool? result = await showDialog<bool>(
+                                          context: context,
+                                          barrierDismissible: true,
+                                          builder: (context) =>
+                                              VideoPreviewDialog(
+                                            title: newvideo['title'],
+                                            description:
+                                                newvideo['description'],
+                                            thumbnailUrl: thumbnailUrl,
+                                            duration: newvideo['duration'],
+                                            releaseYear:
+                                                newvideo['releaseYear'],
+                                            cbfc: newvideo['cbfc'],
+                                            starcast: newvideo['starcast'],
                                           ),
                                         );
-                                      }
-                                    },
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(right: 10),
-                                      child: VideoThumbnail(video: newvideo),
-                                    ),
-                                  );
-                                },
-                              )),
-                        ),
-                      ],
+
+                                        if (result == true) {
+                                          Navigator.of(context).pushReplacement(
+                                            MaterialPageRoute(
+                                              builder: (_) => ViewVideo(
+                                                releaseYear:
+                                                    newvideo['releaseYear'],
+                                                starcast: newvideo['starcast'],
+                                                cbfc: newvideo['cbfc'],
+                                                myList: newvideo['myList'],
+                                                duration: newvideo['duration'],
+                                                director: newvideo['director'],
+                                                videoLink: newvideo['videoUrl'],
+                                                videoTitle: newvideo['title'],
+                                                description:
+                                                    newvideo['description'],
+                                                category: category,
+                                                videoId: newvideo['videoId'],
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      },
+                                      child: Padding(
+                                        padding:
+                                            const EdgeInsets.only(right: 10),
+                                        child: VideoThumbnail(video: newvideo),
+                                      ),
+                                    );
+                                  },
+                                )),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
                   if (!isSubscribed)
                     SubscriptionAlert(
                       onActivate: () => Get.to(() => SubscriptionsScreen()),

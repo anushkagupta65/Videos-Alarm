@@ -2,8 +2,8 @@ name: videos_alarm_app
 description: A new Flutter project.
 publish_to: "none"
 
-# version: 2.1.1+44 #Version for Android (Uncomment this while uploading to Play Store)
-version: 2.3.7+10 #Version for iOS  (Uncomment this while uploading to App Store)
+version: 2.3.1+61 #Version for Android
+# version: 3.0.8+19 #Version for iOS
 
 environment:
   sdk: ">=3.0.6 <4.0.0"
@@ -33,7 +33,7 @@ dependencies:
   cloud_firestore: ^5.4.4
   firebase_storage: ^12.3.4
   firebase_messaging: ^15.1.3
-  in_app_purchase: ^3.2.0
+  in_app_purchase: ^3.2.3
   intl: ^0.20.1
   cached_network_image: ^3.4.1
   flutter_spinkit: ^5.2.1
@@ -50,13 +50,13 @@ dependencies:
   flutter_dotenv: ^5.2.1
   firebase_analytics: ^11.3.3
   flutter_screenutil: ^5.9.3
-  device_info_plus: ^9.1.0
+  device_info_plus: ^10.1.2
   facebook_app_events: ^0.20.1
   better_player_enhanced: ^0.0.5
   wakelock_plus: ^1.3.2
   app_links: ^6.4.0
   shimmer: ^3.0.0
-  image_picker: ^1.0.0
+  image_picker: ^1.1.2
   upgrader: ^11.4.0
 
 dependency_overrides:
@@ -65,12 +65,27 @@ dependency_overrides:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_launcher_icons: ^0.14.1
+  flutter_launcher_icons: "^0.14.4"
 
-flutter_icons:
-  android: true
+flutter_launcher_icons:
+  android: "ic_launcher"
   ios: true
-  image_path: "assets/images/black_app_logo.png"
+  image_path: "assets/images/ic_launcher.png"
+  min_sdk_android: 21
+
+  web:
+    generate: true
+    image_path: "assets/images/ic_launcher.png"
+
+  windows:
+    generate: true
+    image_path: "assets/images/ic_launcher.png"
+    icon_size: 48
+
+  macos:
+    generate: true
+    image_path: "assets/images/ic_launcher.png"
+
   flutter_lints: ^2.0.0
 
 flutter:

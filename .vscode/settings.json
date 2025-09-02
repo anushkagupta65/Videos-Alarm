@@ -1,7 +1,6 @@
 {
   "java.configuration.updateBuildConfiguration": "interactive",
-  "cSpell.words": [
-    "cbfc"
-  ],
-  "dart.flutterSdkPath": ".fvm/versions/3.27.4"
+  "cSpell.words": ["cbfc"],
+  "dart.flutterSdkPath": ".fvm/versions/3.27.4",
+  "cmake.sourceDirectory": "/Users/mangeshsingh/Downloads/videosalarm_android_tv/windows"
 }

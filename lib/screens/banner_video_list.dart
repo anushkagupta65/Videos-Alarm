@@ -1,11 +1,11 @@
+// ignore_for_file: must_be_immutable, unused_field
+
 import 'dart:async';
 import 'package:app_links/app_links.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:facebook_app_events/facebook_app_events.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:videos_alarm_app/screens/check_subs_controller.dart';
 import 'package:videos_alarm_app/screens/live_videos.dart';
 import 'package:videos_alarm_app/screens/news_screen.dart';
 import 'package:videos_alarm_app/screens/search_screen.dart';
@@ -45,6 +45,8 @@ class BottomBarTabsState extends State<BottomBarTabs> {
   final _analytics = FirebaseAnalytics.instance;
   final _facebookAppEvents = FacebookAppEvents();
   final HomeController controller = Get.put(HomeController());
+  final LiveVideosController liveController = Get.put(LiveVideosController());
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -205,7 +207,7 @@ class BottomBarTabsState extends State<BottomBarTabs> {
   }
 
   void goToTab(int index) {
-    SubscriptionService().checkSubscriptionStatus();
+    // SubscriptionService().checkSubscriptionStatus();
 
     if (mounted) {
       setState(() {
@@ -217,85 +219,141 @@ class BottomBarTabsState extends State<BottomBarTabs> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: blackColor,
-      appBar: AppBar(
-        backgroundColor: blackColor,
-        elevation: 3,
-        centerTitle: true,
-        automaticallyImplyLeading: false,
-        title: Text(
-          "VideosAlarm",
-          style: TextStyle(
-            color: whiteColor,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        actions: widget.initialIndex == 0
-            ? [
-                PopupMenuButton<String>(
-                  icon: Icon(Icons.more_vert, color: whiteColor),
-                  color: Colors.blueAccent.shade100,
-                  elevation: 10,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    side: BorderSide(color: Colors.grey.shade800, width: 1),
-                  ),
-                  itemBuilder: (BuildContext context) =>
-                      <PopupMenuEntry<String>>[
-                    PopupMenuItem<String>(
-                      value: 'search',
-                      child: Row(
-                        children: [
-                          Icon(Icons.search, color: Colors.white),
-                          SizedBox(width: 10),
-                          Text(
-                            'Search',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem<String>(
-                      value: 'refresh',
-                      child: Row(
-                        children: [
-                          Icon(Icons.refresh, color: Colors.white),
-                          SizedBox(width: 10),
-                          Text(
-                            'Refresh',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                  onSelected: (String value) {
-                    if (value == 'search') {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => SearchScreen()),
-                      );
-                      print("this was called after search");
-                    } else if (value == 'refresh') {
-                      controller.onRefresh();
-                    }
-                  },
-                ),
-              ]
-            : null,
-      ),
+      appBar: _buildAppBar(),
       body: IndexedStack(index: widget.initialIndex, children: _widgetOptions),
       bottomNavigationBar: _buildCustomBottomNavBar(),
     );
+  }
+
+  PreferredSizeWidget? _buildAppBar() {
+    switch (widget.initialIndex) {
+      case 0: // Home
+        return AppBar(
+          backgroundColor: blackColor,
+          elevation: 3,
+          centerTitle: true,
+          automaticallyImplyLeading: false,
+          title: Text(
+            "VideosAlarm",
+            style: TextStyle(
+              color: whiteColor,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          actions: [
+            PopupMenuButton<String>(
+              icon: Icon(Icons.more_vert, color: whiteColor),
+              color: Colors.blueAccent.shade100,
+              elevation: 10,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(color: Colors.grey.shade800, width: 1),
+              ),
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                PopupMenuItem<String>(
+                  value: 'search',
+                  child: Row(
+                    children: [
+                      Icon(Icons.search, color: Colors.white),
+                      SizedBox(width: 10),
+                      Text(
+                        'Search',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                PopupMenuItem<String>(
+                  value: 'refresh',
+                  child: Row(
+                    children: [
+                      Icon(Icons.refresh, color: Colors.white),
+                      SizedBox(width: 10),
+                      Text(
+                        'Refresh',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              onSelected: (String value) {
+                if (value == 'search') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => SearchScreen()),
+                  );
+                  print("this was called after search");
+                } else if (value == 'refresh') {
+                  controller.onRefresh();
+                }
+              },
+            ),
+          ],
+        );
+
+      case 1: // Live Videos
+        return AppBar(
+          backgroundColor: blackColor,
+          elevation: 3,
+          centerTitle: true,
+          title: Text(
+            "Live Videos",
+            style: TextStyle(
+              color: whiteColor,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        );
+
+      case 2: // News
+        return AppBar(
+          backgroundColor: blackColor,
+          elevation: 3,
+          centerTitle: true,
+          title: Text(
+            "Blogs & News",
+            style: TextStyle(
+              color: whiteColor,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        );
+
+      case 3: // Support
+        return AppBar(
+          backgroundColor: blackColor,
+          elevation: 3,
+          centerTitle: true,
+          title: Text(
+            "Support Center",
+            style: TextStyle(
+              color: whiteColor,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        );
+
+      case 4: // Settings
+        return null;
+
+      default:
+        return null; // No AppBar for unrecognized index
+    }
   }
 
   Widget _buildCustomBottomNavBar() {

@@ -128,7 +128,7 @@ class _VerifyOTPState extends State<VerifyOTP> {
               SizedBox(
                 width: 100,
                 height: 100,
-                child: Image.asset(blackAppLogo),
+                child: Image.asset(appLogo),
               ),
               SizedBox(height: sidePadding),
               RichText(
@@ -305,7 +305,7 @@ class _VerifyOTPState extends State<VerifyOTP> {
 //               SizedBox(
 //                   width: 100,
 //                   height: 100,
-//                   child: Image.asset(blackAppLogo)),
+//                   child: Image.asset(appLogo)),
 //               SizedBox(height: sidePadding,),
 
 //               RichText(

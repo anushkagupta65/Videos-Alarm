@@ -12,8 +12,10 @@ import 'package:videos_alarm_app/screens/Vid_controller.dart';
 import 'package:videos_alarm_app/screens/banner_video_list.dart';
 import '../components/app_style.dart';
 import '../components/constant.dart';
-import 'package:flutter/services.dart'; // Import for input formatters
-import 'package:fluttertoast/fluttertoast.dart'; // Import fluttertoast
+import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import '../device_guard.dart';
+import '../device_limit_screen.dart';
 
 class LogInScreen extends StatefulWidget {
   const LogInScreen({Key? key}) : super(key: key);
@@ -99,7 +101,6 @@ class _LogInScreenState extends State<LogInScreen> {
         isLoading = false;
       });
       commToast('Error checking user: Please try again.');
-      print('Error checking user existence: $e');
       return false;
     }
   }
@@ -173,7 +174,7 @@ class _LogInScreenState extends State<LogInScreen> {
       });
       commToast('Login Successful! (Simulated)');
       Get.offAll(() => BottomBarTabs(initialIndex: 0));
-      return; //Exit early
+      return;
     }
 
     const String apiUrl = 'http://165.22.215.103:3066/verifyOtp';
@@ -202,20 +203,23 @@ class _LogInScreenState extends State<LogInScreen> {
         User? user = userCredential.user;
 
         if (user != null) {
-          // Using a transaction for more robust Firestore updates
+          if (!await validateAndAddDevice(user.uid, context)) {
+            setState(() {
+              isLoading = false;
+            });
+            Get.off(() => const DeviceLimitScreen());
+            return;
+          }
           FirebaseFirestore.instance.runTransaction((transaction) async {
             DocumentReference userDocRef =
                 FirebaseFirestore.instance.collection('users').doc(user.uid);
             DocumentSnapshot snapshot = await transaction.get(userDocRef);
 
-            // No need to set if it doesn't exist on login, only update lastLogin
             if (snapshot.exists) {
               transaction.update(userDocRef, {
                 'lastLogin': FieldValue.serverTimestamp(),
               });
             }
-            // If user doesn't exist in Firestore here, something is wrong with the flow
-            // as the checkUserExists should have prevented this.
           }).then((_) {
             setState(() {
               isLoading = false;
@@ -305,19 +309,17 @@ class _LogInScreenState extends State<LogInScreen> {
     );
   }
 
-  //** START HERE - Replace the old commToast */
   void commToast(String message) {
     Fluttertoast.showToast(
       msg: message,
-      toastLength: Toast.LENGTH_SHORT, // You can use Toast.LENGTH_LONG
-      gravity: ToastGravity.BOTTOM, // Or other positions like TOP, CENTER
-      timeInSecForIosWeb: 1, // iOS-specific duration
-      backgroundColor: Colors.grey[800], // Adjust color as desired
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.grey[800],
       textColor: Colors.white,
       fontSize: 16.0,
     );
   }
-  //** END commToast */
 
   @override
   Widget build(BuildContext context) {
@@ -326,42 +328,36 @@ class _LogInScreenState extends State<LogInScreen> {
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topLeft, // Slightly different gradient angle
+            begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              // Adjusting gradient colors for a richer dark theme
-              darkColor.withOpacity(0.8), // Slightly less opaque dark
+              darkColor.withOpacity(0.8),
               blackColor,
               darkColor.withOpacity(0.8),
             ],
-            stops: const [0.0, 0.5, 1.0], // Adjusted stops
+            stops: const [0.0, 0.5, 1.0],
           ),
         ),
         child: Center(
           child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(
-                horizontal: sidePadding,
-                vertical: 32), // Added vertical padding
+            padding:
+                EdgeInsets.symmetric(horizontal: sidePadding, vertical: 32),
             child: Form(
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Logo
                   Container(
-                    margin:
-                        EdgeInsets.only(bottom: 48), // Increased bottom margin
+                    margin: EdgeInsets.only(bottom: 48),
                     alignment: Alignment.center,
                     child: SizedBox(
-                      width: 120, // Slightly larger logo
+                      width: 120,
                       height: 120,
-                      child: Image.asset(blackAppLogo),
+                      child: Image.asset(appLogo),
                     ),
                   ),
-
-                  // Phone Number Input OR OTP Message and Fields
-                  if (!isOtpSent) // Show phone input if OTP is not sent
+                  if (!isOtpSent)
                     _buildTextFormField(
                       controller: phoneController,
                       labelText: "Phone Number",
@@ -376,8 +372,7 @@ class _LogInScreenState extends State<LogInScreen> {
                         return null;
                       },
                     ),
-
-                  if (isOtpSent) // Show OTP message and fields if OTP is sent
+                  if (isOtpSent)
                     AnimatedOpacity(
                       opacity: isOtpSent ? 1.0 : 0.0,
                       duration: const Duration(milliseconds: 300),
@@ -388,7 +383,7 @@ class _LogInScreenState extends State<LogInScreen> {
                             padding:
                                 const EdgeInsets.only(bottom: 8.0, left: 4),
                             child: Text(
-                              "OTP sent to ${phoneController.text.trim()}", // Display the number OTP was sent to
+                              "OTP sent to ${phoneController.text.trim()}",
                               style: TextStyle(
                                 color: Colors.white70,
                                 fontWeight: FontWeight.w400,
@@ -397,7 +392,6 @@ class _LogInScreenState extends State<LogInScreen> {
                             ),
                           ),
                           Padding(
-                            // Label for OTP input
                             padding:
                                 const EdgeInsets.only(bottom: 8.0, left: 4),
                             child: Text(
@@ -413,31 +407,22 @@ class _LogInScreenState extends State<LogInScreen> {
                         ],
                       ),
                     ),
-
-                  SizedBox(
-                      height:
-                          20), // Spacing consistent regardless of which input is shown
-
-                  // Terms and Conditions
+                  SizedBox(height: 20),
                   Theme(
                     data: ThemeData(
-                      unselectedWidgetColor:
-                          Colors.white70, // Slightly less bright for harmony
+                      unselectedWidgetColor: Colors.white70,
                       checkboxTheme: CheckboxThemeData(
                         fillColor: MaterialStateProperty.resolveWith<Color?>(
                           (Set<MaterialState> states) {
                             if (states.contains(MaterialState.selected)) {
-                              return greenColor; // Active color
+                              return greenColor;
                             }
-                            return Colors.transparent; // Unselected color
+                            return Colors.transparent;
                           },
                         ),
-                        checkColor: MaterialStateProperty.all(
-                            blackColor), // Checkmark color
-                        side: BorderSide(
-                            color: Colors.white70, width: 1.5), // Border color
+                        checkColor: MaterialStateProperty.all(blackColor),
+                        side: BorderSide(color: Colors.white70, width: 1.5),
                         shape: RoundedRectangleBorder(
-                          // Rounded checkbox
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -454,39 +439,30 @@ class _LogInScreenState extends State<LogInScreen> {
                       title: _buildTermsAndConditionsText(),
                     ),
                   ),
-                  SizedBox(height: 32), // Increased spacing
-
-                  // Action Button
+                  SizedBox(height: 32),
                   ElevatedButton(
                     onPressed: isLoading
                         ? null
                         : () async {
-                            // Made the onPressed async
-                            // Disable button when loading
                             if (!_formKey.currentState!.validate() ||
                                 !agreeTcs) {
                               if (!agreeTcs &&
                                   _formKey.currentState!.validate()) {
-                                // Show toast only if validation passes but T&C not agreed
-                                commToast("Agree to Terms & Conditions");
+                                commToast(" Agree to Terms & Conditions");
                               }
                               return;
                             }
                             if (!isOtpSent) {
-                              // --- Check user existence before sending OTP ---
                               String phoneNumber = phoneController.text.trim();
                               bool userExists =
                                   await checkUserExists(phoneNumber);
-
                               if (userExists) {
-                                sendOtpForLogin(
-                                    phoneNumber); // Proceed to send OTP if user exists
+                                sendOtpForLogin(phoneNumber);
                               } else {
-                                // User does not exist, show dialog and navigate to register
                                 _showUserNotFoundDialog(context);
                               }
                             } else {
-                              verifyOtpAndSignIn(); // Verify OTP if already sent
+                              verifyOtpAndSignIn();
                             }
                           },
                     style: ElevatedButton.styleFrom(
@@ -500,26 +476,22 @@ class _LogInScreenState extends State<LogInScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      elevation: 5, // Added elevation for depth
-                      shadowColor: greenColor.withOpacity(0.5), // Subtle shadow
+                      elevation: 5,
+                      shadowColor: greenColor.withOpacity(0.5),
                     ),
                     child: isLoading
                         ? SizedBox(
-                            // Use SizedBox for consistent size
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
                               valueColor:
                                   AlwaysStoppedAnimation<Color>(blackColor),
-                              strokeWidth: 2, // Thinner progress indicator
+                              strokeWidth: 2,
                             ),
                           )
                         : Text(isOtpSent ? "Verify OTP" : "Send OTP"),
                   ),
-
-                  SizedBox(height: 40), // Increased spacing
-
-                  // Register Link
+                  SizedBox(height: 40),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -527,7 +499,7 @@ class _LogInScreenState extends State<LogInScreen> {
                         "Don't have an account?",
                         style: TextStyle(
                           color: Colors.white70,
-                          fontSize: 15, // Slightly smaller font size
+                          fontSize: 15,
                         ),
                       ),
                       TextButton(
@@ -541,14 +513,13 @@ class _LogInScreenState extends State<LogInScreen> {
                         },
                         style: TextButton.styleFrom(
                           foregroundColor: greenColor,
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 8), // Reduced horizontal padding
+                          padding: EdgeInsets.symmetric(horizontal: 8),
                         ),
                         child: Text(
                           "Sign Up",
                           style: TextStyle(
-                            fontSize: 15, // Consistent font size
-                            fontWeight: FontWeight.w700, // Bolder
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
@@ -573,47 +544,41 @@ class _LogInScreenState extends State<LogInScreen> {
   }) {
     return TextFormField(
       controller: controller,
-      cursorColor: blueColor, // Keep accent color for cursor
+      cursorColor: blueColor,
       keyboardType: keyboardType,
       obscureText: obscureText,
       style: TextStyle(
         fontSize: 16,
-        color: whiteColor, // White text on dark background
+        color: whiteColor,
       ),
       decoration: InputDecoration(
         labelText: labelText,
         labelStyle: TextStyle(
-          color: Colors.white70, // Slightly muted label
+          color: Colors.white70,
           fontWeight: FontWeight.w400,
         ),
         prefixIcon:
             prefixIcon != null ? Icon(prefixIcon, color: Colors.white70) : null,
         filled: true,
-        fillColor: darkColor.withOpacity(0.5), // Slightly less opaque fill
+        fillColor: darkColor.withOpacity(0.5),
         border: OutlineInputBorder(
-          borderSide: BorderSide.none, // No border in unfocused state
+          borderSide: BorderSide.none,
           borderRadius: BorderRadius.circular(12),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-              color: blueColor, width: 1.5), // Accent border when focused
+          borderSide: BorderSide(color: blueColor, width: 1.5),
           borderRadius: BorderRadius.circular(12),
         ),
         errorBorder: OutlineInputBorder(
-          // Explicit error border
           borderSide: BorderSide(color: Colors.redAccent, width: 1.5),
           borderRadius: BorderRadius.circular(12),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          // Error border when focused
           borderSide: BorderSide(color: Colors.red, width: 2.0),
           borderRadius: BorderRadius.circular(12),
         ),
-        errorStyle: TextStyle(
-            color: Colors.redAccent,
-            fontSize: 12), // Slightly smaller error text
-        contentPadding: EdgeInsets.symmetric(
-            horizontal: 16, vertical: 14), // Added content padding
+        errorStyle: TextStyle(color: Colors.redAccent, fontSize: 12),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
       validator: validator,
     );
@@ -633,10 +598,8 @@ class _LogInScreenState extends State<LogInScreen> {
         }
       },
       child: Padding(
-        // Added padding for better touch area
         padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: RichText(
-          // Using RichText for more flexibility in styling
           text: TextSpan(
             children: [
               TextSpan(
@@ -649,8 +612,8 @@ class _LogInScreenState extends State<LogInScreen> {
               TextSpan(
                 text: "Terms & Conditions",
                 style: TextStyle(
-                  color: greenColor, // Accent color for link
-                  fontWeight: FontWeight.w600, // Bolder
+                  color: greenColor,
+                  fontWeight: FontWeight.w600,
                   decoration: TextDecoration.underline,
                 ),
               ),
@@ -666,37 +629,35 @@ class _LogInScreenState extends State<LogInScreen> {
       appContext: context,
       length: 6,
       controller: TextEditingController(),
-      focusNode: null, // Optional: manage focus externally if needed
+      focusNode: null,
       keyboardType: TextInputType.number,
       textStyle: TextStyle(
         fontSize: 20,
-        color: whiteColor, // White digit text
+        color: whiteColor,
         fontWeight: FontWeight.bold,
       ),
       inputFormatters: [
-        FilteringTextInputFormatter.digitsOnly, // Only allow digits
+        FilteringTextInputFormatter.digitsOnly,
       ],
       pinTheme: PinTheme(
         shape: PinCodeFieldShape.box,
-        fieldHeight: 50, // Match original height
-        fieldWidth: 50, // Match original width
-        activeColor: blueColor, // Accent border when focused
-        inactiveColor: Colors.white30, // Subtle border when unfocused
-        selectedColor: blueColor, // Border when selected
-        errorBorderColor: Colors.redAccent, // Error border
-        activeFillColor: darkColor.withOpacity(0.5), // Consistent fill color
-        inactiveFillColor: darkColor.withOpacity(0.5), // Consistent fill color
-        selectedFillColor: darkColor.withOpacity(0.5), // Consistent fill color
-        borderRadius: BorderRadius.circular(12), // Consistent border radius
-        borderWidth: 1.0, // Default border width
-        activeBorderWidth: 1.5, // Focused border width
-        errorBorderWidth: 1.5, // Error border width
-        selectedBorderWidth: 1.5, // Selected border width
+        fieldHeight: 50,
+        fieldWidth: 50,
+        activeColor: blueColor,
+        inactiveColor: Colors.white30,
+        selectedColor: blueColor,
+        errorBorderColor: Colors.redAccent,
+        activeFillColor: darkColor.withOpacity(0.5),
+        inactiveFillColor: darkColor.withOpacity(0.5),
+        selectedFillColor: darkColor.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(12),
+        borderWidth: 1.0,
+        activeBorderWidth: 1.5,
+        errorBorderWidth: 1.5,
+        selectedBorderWidth: 1.5,
       ),
-      enableActiveFill: true, // Enable fill color
+      enableActiveFill: true,
       onChanged: (value) {
-        // Handle OTP input changes
-        // You can update your controllers or state here if needed
         for (int i = 0; i < otpDigitControllers.length; i++) {
           if (i < value.length) {
             otpDigitControllers[i].text = value[i];
@@ -706,11 +667,9 @@ class _LogInScreenState extends State<LogInScreen> {
         }
       },
       onCompleted: (value) {
-        // When all boxes are filled, unfocus the keyboard
         FocusScope.of(context).unfocus();
       },
       beforeTextPaste: (text) {
-        // Allow pasting only if it's numeric and matches length
         return RegExp(r'^\d+$').hasMatch(text!) &&
             text.length <= otpDigitControllers.length;
       },
@@ -720,10 +679,10 @@ class _LogInScreenState extends State<LogInScreen> {
         }
         return null;
       },
-      errorTextSpace: 0, // Hide default error text
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Space boxes evenly
-      animationType: AnimationType.none, // Disable animations for simplicity
-      cursorColor: blueColor, // Match focused border color
+      errorTextSpace: 0,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      animationType: AnimationType.none,
+      cursorColor: blueColor,
     );
   }
 }

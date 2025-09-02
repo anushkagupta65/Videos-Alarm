@@ -19,6 +19,16 @@ class BlogDetailsScreen extends StatelessWidget {
         backgroundColor: blackColor,
         foregroundColor: whiteColor,
         title: Text(article.title ?? "Blog Details"),
+        leading: Focus(
+          canRequestFocus: true, // Enable focus for remote control
+          child: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(context); // Handle back button press
+            },
+            tooltip: 'Back', // Accessibility for remote navigation
+          ),
+        ),
       ),
       body: Container(
         height: height,
@@ -70,16 +80,14 @@ class BlogDetailsScreen extends StatelessWidget {
               ),
               SizedBox(height: 8),
               Text(
-                   DateFormat('d MMM yyyy').format(
-                                              DateTime.parse(
-                                                  article.publishedAt.toString()),
-                                            ),
+                DateFormat('d MMM yyyy').format(
+                  DateTime.parse(article.publishedAt.toString()),
+                ),
                 style: TextStyle(color: Colors.grey),
               ),
               SizedBox(height: 20),
               Text(
                 article.content ?? "",
-                // "lksjdldsfkjsdlkj lksdfjlk jlkd lsdjflksdj kljsdflkjslk jlksdjf sdlkfjklsjflk jdlksfjdlskj lkfjlkjlk jlskjflkj lkjlskdjlk jlsdkfnjdslkj lkdjsfklj lkjdslfkj lkjflkj kldjflkj kldsfjlk jkljfdklj klsdjfklj lksdjfkdlsjf kldjfkldsjfkl jdsklsfjk jkdsfjkl kldsfjlkj kldjfkl jklsdjflkklsdjflksdjj kjdsfkljdsklj lksdjfklfjkl jkljkl kdjflkj kljdsfklsjdkl jklsdfjkl jkldsjfklsdj klsjdflkj lkdjflkj lksjdflkj kljdsflkj lksdj lkjsdklfjsdklj lkdjsflkj klj lksdjflkjlk jsdklfjsdlkfj sdlkfjsdlkfjsdklj kldsjfkldsfjsdklfjkljkl jdslkfjdsklfjdsklfjdlkj kldsjfkldsjfkl jkldfjlkj lkj kl kjdlksjflk jlksdjflksdj lkjsdflkjskl jlkdsjflksdj lkjsdlkfjkl jklsdjflksdj kljfklsdj kldjfklsdjk ljdsklfjsdkfljlk jklfjkl jksldfjkl jksdlfjksdljfk jsdklfjsdkljk lskdlfjklcj kldjskfljkl jsdklfjsdklj jsdklfjdslkjfkl jdklsfjklsdj kdjfkldsfjk jdklfjdsklvjkds jfskldj klsdjflksdjflk jklsdjfklsdjfkl klsdfjklsdfjsdklj klsdjfklsdjlkfjkl jflkj lkjdslkfjlk jsdlkfjlk jslkdfjkljkljglkdj lkfjgklj klfjdglkj lkjflksj kljfdglkfjd lkjfkldgjdfk ljlkfjgkljlkj  nm,d j  dsjksd jkv jkd vjk j wkj vjk e jvnwjksdljfsklfjsdklfj sjflkj kl ksfklsbj nkdnfklsnbkdn kldnfklsnbkdlfnlk nlkdnfklsdnlkdsnvlk mslkdfmsdklvmklsjlk jlkfjsdlkj lkjlfkdjsdlkfjlk jdlkfjdslkj lkjslfjsdlkj klfjlkdsjlk jlkgjdslkj lksjflksdjlk jslkfjdsklj lkdjflksdjlkj lkdsjflkdsjflk jlkfjsdlkjf kjfklsdjflk ksdlflwfweiiwewiefjl jdilweiwlefl iile kljdklj lkjwelkjlk jelkwrjl jioejfioj lksdjfisdjvlkxc jlkdsjfklj lkdsjfklsdj sdnf,sdn kldnfm,sdn ,sdfnsdn ,sdfnsdjfn jndfjksnfvilsi ldirwdqwdwdlkn kwjdkjwcv kjfekdsdvndm,vddfjsknvksd jlkjfklj lkjsdklfjklweji lsdnfliwef lknfjsdkljsdkcjvl kkewjflisdklc isejfsdkvdsjklv lkejflksjflsfj",
                 style: TextStyle(fontSize: 16, color: whiteColor),
               ),
               SizedBox(height: 20),
