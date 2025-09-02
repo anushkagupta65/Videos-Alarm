@@ -15,7 +15,7 @@ import 'package:videos_alarm_app/screens/support_screen.dart';
 import 'package:videos_alarm_app/screens/view_video.dart';
 import '../components/app_style.dart';
 import 'package:get/get.dart';
-import 'package:videos_alarm_app/Controller/Sub_controller.dart';
+import 'package:videos_alarm_app/Controller/subscription_controller.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:package_info_plus/package_info_plus.dart';

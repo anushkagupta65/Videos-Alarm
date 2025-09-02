@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:videos_alarm_app/Controller/Sub_controller.dart';
+import 'package:videos_alarm_app/Controller/subscription_controller.dart';
 import 'package:videos_alarm_app/screens/Current_sub.dart';
 import 'package:videos_alarm_app/screens/Subs_card.dart';
 import 'package:videos_alarm_app/screens/Vid_controller.dart';

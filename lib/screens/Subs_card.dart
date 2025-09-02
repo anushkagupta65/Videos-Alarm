@@ -195,7 +195,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:videos_alarm_app/Controller/Sub_controller.dart';
+import 'package:videos_alarm_app/Controller/subscription_controller.dart';
 
 class SubscriptionPlanCard extends StatefulWidget {
   final String planId;

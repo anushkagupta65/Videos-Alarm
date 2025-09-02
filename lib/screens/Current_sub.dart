@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
-import 'package:videos_alarm_app/Controller/Sub_controller.dart';
+import 'package:videos_alarm_app/Controller/subscription_controller.dart';
 import 'package:videos_alarm_app/components/app_style.dart';
 import 'package:videos_alarm_app/screens/Vid_controller.dart';
 
